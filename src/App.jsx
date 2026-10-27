@@ -17,6 +17,7 @@ import SafetyGuidelinesPage from './pages/SafetyGuidelinesPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import SettingsPage from './pages/SettingsPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 // Scroll to top component on route changes
 const ScrollToTop = () => {
@@ -130,8 +131,8 @@ const MainLayout = () => {
             }
           />
 
-          {/* Catch-all route */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          {/* Catch-all route for unknown application paths */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
 
