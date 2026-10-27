@@ -481,4 +481,127 @@ describe('ShareBite Backend API Test Suite', () => {
       assert.strictEqual(listingInDb.reservedQuantity, 20); // Released 15 back!
     });
   });
+
+  describe('Admin Dashboard & Moderation API (/api/admin)', () => {
+    let adminToken;
+    let adminUser;
+
+    before(async () => {
+      const bcrypt = (await import('bcryptjs')).default;
+      const hash = await bcrypt.hash('AdminPassword123!', 10);
+      adminUser = await User.create({
+        name: 'David Vance',
+        email: 'david.safety@sharebite.org',
+        passwordHash: hash,
+        role: 'admin',
+        organizationName: 'Safety Ops',
+        isVerified: true,
+      });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: 'david.safety@sharebite.org',
+        password: 'AdminPassword123!',
+      });
+      adminToken = loginRes.body.token;
+    });
+
+    it('should reject GET /api/admin/stats from non-admin users (role guard)', async () => {
+      const res = await request(app)
+        .get('/api/admin/stats')
+        .set('Authorization', `Bearer ${donorToken}`);
+
+      assert.strictEqual(res.status, 403);
+    });
+
+    it('should return real platform statistics on GET /api/admin/stats for admin', async () => {
+      const res = await request(app)
+        .get('/api/admin/stats')
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      assert.strictEqual(res.status, 200);
+      assert.ok(res.body.data.users);
+      assert.ok(res.body.data.listings);
+      assert.ok(res.body.data.requests);
+      assert.ok(res.body.data.impact);
+      assert.ok(typeof res.body.data.users.total === 'number');
+    });
+
+    it('should return user records on GET /api/admin/users', async () => {
+      const res = await request(app)
+        .get('/api/admin/users')
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      assert.strictEqual(res.status, 200);
+      assert.ok(Array.isArray(res.body.data));
+      assert.ok(res.body.count > 0);
+    });
+
+    it('should verify and update organization status on PATCH /api/admin/users/:id/verify', async () => {
+      const usersRes = await request(app)
+        .get('/api/admin/users?role=donor')
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      const targetUser = usersRes.body.data[0];
+      assert.ok(targetUser);
+
+      const verifyRes = await request(app)
+        .patch(`/api/admin/users/${targetUser._id}/verify`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ isVerified: true });
+
+      assert.strictEqual(verifyRes.status, 200);
+      assert.strictEqual(verifyRes.body.data.isVerified, true);
+    });
+
+    it('should moderate a food listing on PATCH /api/admin/listings/:id/moderate', async () => {
+      const modRes = await request(app)
+        .patch(`/api/admin/listings/${createdListingId}/moderate`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          status: 'cancelled',
+          reason: 'Temperature log discrepancy audit'
+        });
+
+      assert.strictEqual(modRes.status, 200);
+      assert.strictEqual(modRes.body.data.status, 'cancelled');
+    });
+
+    it('should return chronological event audit logs on GET /api/admin/audit-logs', async () => {
+      const logsRes = await request(app)
+        .get('/api/admin/audit-logs')
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      assert.strictEqual(logsRes.status, 200);
+      assert.ok(Array.isArray(logsRes.body.data));
+      assert.ok(logsRes.body.count > 0);
+    });
+
+    it('should resolve a safety report on PATCH /api/reports/:id', async () => {
+      // Create a report first
+      const createReportRes = await request(app)
+        .post('/api/reports')
+        .set('Authorization', `Bearer ${recipientToken}`)
+        .send({
+          listingId: createdListingId,
+          reason: 'safety_concern',
+          details: 'Food packaging seal arrived broken upon pickup inspection'
+        });
+
+      assert.strictEqual(createReportRes.status, 201);
+      const reportId = createReportRes.body.data._id;
+
+      // Admin resolves report
+      const resolveRes = await request(app)
+        .patch(`/api/reports/${reportId}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          status: 'action_taken',
+          adminAction: 'Batch inspected and discarded',
+          adminNotes: 'Compliance verification completed.'
+        });
+
+      assert.strictEqual(resolveRes.status, 200);
+      assert.strictEqual(resolveRes.body.data.status, 'action_taken');
+      assert.ok(resolveRes.body.data.resolvedAt);
+    });
+  });
 });

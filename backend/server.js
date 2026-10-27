@@ -7,6 +7,7 @@ import userRoutes from './routes/userRoutes.js';
 import listingRoutes from './routes/listingRoutes.js';
 import requestRoutes from './routes/requestRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 
 // Load environment variables
@@ -60,6 +61,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/listings', listingRoutes);
 app.use('/api/requests', requestRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Fallback error handlers
 app.use(notFound);

@@ -190,6 +190,42 @@ export const api = {
     getAll: async () => {
       return request('/reports', { method: 'GET' });
     },
+    updateStatus: async (id, updateData) => {
+      return request(`/reports/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(updateData),
+      });
+    },
+  },
+
+  // Admin Dashboard & Moderation
+  admin: {
+    getStats: async () => {
+      return request('/admin/stats', { method: 'GET' });
+    },
+    getUsers: async (params = {}) => {
+      const query = new URLSearchParams();
+      if (params.role) query.append('role', params.role);
+      if (params.isVerified !== undefined) query.append('isVerified', params.isVerified);
+      if (params.search) query.append('search', params.search);
+      const queryString = query.toString() ? `?${query.toString()}` : '';
+      return request(`/admin/users${queryString}`, { method: 'GET' });
+    },
+    verifyUser: async (id, isVerified = true) => {
+      return request(`/admin/users/${id}/verify`, {
+        method: 'PATCH',
+        body: JSON.stringify({ isVerified }),
+      });
+    },
+    moderateListing: async (id, status, reason) => {
+      return request(`/admin/listings/${id}/moderate`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status, reason }),
+      });
+    },
+    getAuditLogs: async () => {
+      return request('/admin/audit-logs', { method: 'GET' });
+    },
   },
 
   // Users
