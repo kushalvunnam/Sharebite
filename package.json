@@ -13,7 +13,9 @@
     "seed:force": "node backend/scripts/seed.js --force",
     "test:backend": "node --test backend/tests/*.test.js",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "sync:fetch": "git fetch origin && git fetch collaboration",
+    "sync:push": "git push origin main && git push collaboration main"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
