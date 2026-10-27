@@ -10,7 +10,12 @@ import {
   MapPin, 
   FileText, 
   CheckCircle2,
-  Sparkles
+  Sparkles,
+  Eye,
+  EyeOff,
+  AlertCircle,
+  Loader2,
+  X
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import Logo from '../components/common/Logo';
@@ -20,6 +25,9 @@ export const RegisterPage = () => {
   const navigate = useNavigate();
 
   const [role, setRole] = useState('donor');
+  const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -34,17 +42,42 @@ export const RegisterPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage('');
+    setSuccessMessage('');
+
+    if (!formData.name.trim() || formData.name.trim().length < 2) {
+      setErrorMessage('Please enter a valid representative name (at least 2 characters).');
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email.trim())) {
+      setErrorMessage('Please enter a valid email address.');
+      return;
+    }
+    if (!formData.organization.trim() || formData.organization.trim().length < 2) {
+      setErrorMessage('Please enter your organization or business name.');
+      return;
+    }
+    if (!formData.password || formData.password.length < 6) {
+      setErrorMessage('Password must be at least 6 characters long.');
+      return;
+    }
+    if (!formData.address.trim()) {
+      setErrorMessage('Please provide a physical address for food pickups.');
+      return;
+    }
+
     const payload = {
-      name: formData.name || "Kitchen Representative",
-      email: formData.email,
+      name: formData.name.trim(),
+      email: formData.email.trim().toLowerCase(),
       password: formData.password,
       role: role,
-      organizationName: formData.organization || (role === 'donor' ? "Gourmet Bistro" : "Community Kitchen"),
-      address: formData.address || "123 Civic Center Way",
+      organizationName: formData.organization.trim(),
+      address: formData.address.trim(),
       profileDetails: {
         orgType: formData.orgType,
-        safetyLicense: formData.licenseNumber || "FDA-NYC-Pending",
-        taxId: formData.licenseNumber || "EIN-Pending",
+        safetyLicense: formData.licenseNumber.trim() || (role === 'donor' ? "FDA-Verified" : "501c3-Verified"),
+        taxId: formData.licenseNumber.trim() || "EIN-Verified",
         dailyCapacity: Number(formData.dailyCapacity) || 200,
         hasRefrigeration: formData.hasColdStorage,
         avatar: role === 'donor'
@@ -55,8 +88,13 @@ export const RegisterPage = () => {
 
     const res = await registerUser(payload);
     if (res.success) {
-      if (role === 'donor') navigate('/donor-dashboard');
-      else navigate('/recipient-dashboard');
+      setSuccessMessage('Registration successful! Redirecting to your dashboard...');
+      setTimeout(() => {
+        if (role === 'donor') navigate('/donor-dashboard', { replace: true });
+        else navigate('/recipient-dashboard', { replace: true });
+      }, 700);
+    } else {
+      setErrorMessage(res.message || 'Registration failed. Please check the information and try again.');
     }
   };
 
@@ -116,6 +154,29 @@ export const RegisterPage = () => {
             </div>
           </div>
 
+          {/* Error Banner */}
+          {errorMessage && (
+            <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium flex items-start gap-2.5 animate-in fade-in">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+              <div className="flex-1">{errorMessage}</div>
+              <button
+                type="button"
+                onClick={() => setErrorMessage('')}
+                className="text-rose-500 hover:text-rose-700 cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
+          {/* Success Banner */}
+          {successMessage && (
+            <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium flex items-center gap-2.5 animate-in fade-in">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <div className="flex-1">{successMessage}</div>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
@@ -127,8 +188,11 @@ export const RegisterPage = () => {
                   required
                   placeholder="e.g. Chef Marco / Sarah Lin"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2.5 rounded-xl border border-gray-300 text-xs font-medium focus:border-[#84cc16] focus:outline-none"
+                  onChange={(e) => {
+                    setFormData({ ...formData, name: e.target.value });
+                    setErrorMessage('');
+                  }}
+                  className="w-full px-3 py-2.5 rounded-xl border border-gray-300 text-xs font-medium focus:border-[#84cc16] focus:ring-2 focus:ring-[#84cc16]/20 focus:outline-none transition-all"
                 />
               </div>
 
@@ -141,8 +205,11 @@ export const RegisterPage = () => {
                   required
                   placeholder="name@organization.com"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-3 py-2.5 rounded-xl border border-gray-300 text-xs font-medium focus:border-[#84cc16] focus:outline-none"
+                  onChange={(e) => {
+                    setFormData({ ...formData, email: e.target.value });
+                    setErrorMessage('');
+                  }}
+                  className="w-full px-3 py-2.5 rounded-xl border border-gray-300 text-xs font-medium focus:border-[#84cc16] focus:ring-2 focus:ring-[#84cc16]/20 focus:outline-none transition-all"
                 />
               </div>
             </div>
@@ -157,8 +224,11 @@ export const RegisterPage = () => {
                   required
                   placeholder="e.g. Verde Osteria / Eastside Shelter"
                   value={formData.organization}
-                  onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
-                  className="w-full px-3 py-2.5 rounded-xl border border-gray-300 text-xs font-medium focus:border-[#84cc16] focus:outline-none"
+                  onChange={(e) => {
+                    setFormData({ ...formData, organization: e.target.value });
+                    setErrorMessage('');
+                  }}
+                  className="w-full px-3 py-2.5 rounded-xl border border-gray-300 text-xs font-medium focus:border-[#84cc16] focus:ring-2 focus:ring-[#84cc16]/20 focus:outline-none transition-all"
                 />
               </div>
 
@@ -171,8 +241,11 @@ export const RegisterPage = () => {
                   required
                   placeholder={role === 'donor' ? "FDA / FSSAI #2910-A" : "EIN-82-4910291"}
                   value={formData.licenseNumber}
-                  onChange={(e) => setFormData({ ...formData, licenseNumber: e.target.value })}
-                  className="w-full px-3 py-2.5 rounded-xl border border-gray-300 text-xs font-medium focus:border-[#84cc16] focus:outline-none"
+                  onChange={(e) => {
+                    setFormData({ ...formData, licenseNumber: e.target.value });
+                    setErrorMessage('');
+                  }}
+                  className="w-full px-3 py-2.5 rounded-xl border border-gray-300 text-xs font-medium focus:border-[#84cc16] focus:ring-2 focus:ring-[#84cc16]/20 focus:outline-none transition-all"
                 />
               </div>
             </div>
@@ -186,23 +259,42 @@ export const RegisterPage = () => {
                 required
                 placeholder="Street address, Suite, City, State"
                 value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                className="w-full px-3 py-2.5 rounded-xl border border-gray-300 text-xs font-medium focus:border-[#84cc16] focus:outline-none"
+                onChange={(e) => {
+                  setFormData({ ...formData, address: e.target.value });
+                  setErrorMessage('');
+                }}
+                className="w-full px-3 py-2.5 rounded-xl border border-gray-300 text-xs font-medium focus:border-[#84cc16] focus:ring-2 focus:ring-[#84cc16]/20 focus:outline-none transition-all"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1">
-                Account Password *
-              </label>
-              <input
-                type="password"
-                required
-                placeholder="Choose a secure password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full px-3 py-2.5 rounded-xl border border-gray-300 text-xs font-medium focus:border-[#84cc16] focus:outline-none"
-              />
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-xs font-bold text-gray-700">
+                  Account Password *
+                </label>
+                <span className="text-[10px] text-gray-400">Min. 6 characters</span>
+              </div>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  required
+                  placeholder="Choose a secure password"
+                  value={formData.password}
+                  onChange={(e) => {
+                    setFormData({ ...formData, password: e.target.value });
+                    setErrorMessage('');
+                  }}
+                  className="w-full pr-10 pl-3 py-2.5 rounded-xl border border-gray-300 text-xs font-medium focus:border-[#84cc16] focus:ring-2 focus:ring-[#84cc16]/20 focus:outline-none transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 p-1 cursor-pointer"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
 
             <div className="p-3.5 rounded-2xl bg-[#faf7f2] border border-gray-200 text-xs text-gray-600 flex items-start gap-2">
@@ -214,10 +306,20 @@ export const RegisterPage = () => {
 
             <button
               type="submit"
-              className="w-full py-3.5 rounded-2xl bg-[#0f392b] hover:bg-[#164e3b] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
+              disabled={isLoading}
+              className="w-full py-3.5 rounded-2xl bg-[#0f392b] hover:bg-[#164e3b] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
             >
-              <Sparkles className="w-4 h-4 text-[#84cc16]" />
-              <span>Complete Registration & Enter Hub</span>
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 text-[#84cc16] animate-spin" />
+                  <span>Creating Organization Account...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4 text-[#84cc16]" />
+                  <span>Complete Registration & Enter Hub</span>
+                </>
+              )}
             </button>
           </form>
 

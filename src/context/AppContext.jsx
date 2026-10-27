@@ -142,6 +142,37 @@ export const AppProvider = ({ children }) => {
       setApiStatus('connected');
       setApiHealth(health);
 
+      // Verify active session with backend if token exists in storage
+      const token = api.getAuthToken();
+      if (token) {
+        try {
+          const userRes = await api.users.getMe();
+          if (userRes && userRes.user) {
+            const userObj = {
+              id: userRes.user._id,
+              name: userRes.user.name,
+              email: userRes.user.email,
+              role: userRes.user.role,
+              organization: userRes.user.organizationName || userRes.user.name,
+              address: userRes.user.address,
+              avatar: userRes.user.profileDetails?.avatar,
+              safetyLicense: userRes.user.profileDetails?.safetyLicense,
+              taxId: userRes.user.profileDetails?.taxId,
+              preferences: userRes.user.preferences,
+            };
+            setCurrentUser(userObj);
+          }
+        } catch (authErr) {
+          // If token is expired or invalid (401), safely clear invalid session
+          if (authErr.status === 401) {
+            api.auth.logout();
+            setCurrentUser(null);
+            localStorage.removeItem('sharebite_user');
+            localStorage.removeItem('sharebite_token');
+          }
+        }
+      }
+
       // Fetch live listings if connected
       try {
         const res = await api.listings.getAll();
@@ -196,99 +227,70 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  // Real or mock login
+  // Real API login
   const loginUser = async (credentials) => {
     setIsLoading(true);
     try {
-      if (apiStatus === 'connected') {
-        const res = await api.auth.login(credentials);
-        if (res.user) {
-          const userObj = {
-            id: res.user._id,
-            name: res.user.name,
-            email: res.user.email,
-            role: res.user.role,
-            organization: res.user.organizationName || res.user.name,
-            address: res.user.address,
-            avatar: res.user.profileDetails?.avatar,
-            safetyLicense: res.user.profileDetails?.safetyLicense,
-            taxId: res.user.profileDetails?.taxId,
-          };
-          setCurrentUser(userObj);
-          showToast(`Welcome back, ${res.user.name}!`, 'success');
-          setIsLoading(false);
-          return { success: true, user: userObj };
-        }
-      }
-    } catch (err) {
-      if (!err.isOffline) {
-        showToast(err.message || 'Login failed', 'error');
+      const res = await api.auth.login(credentials);
+      if (res && res.user) {
+        const userObj = {
+          id: res.user._id,
+          name: res.user.name,
+          email: res.user.email,
+          role: res.user.role,
+          organization: res.user.organizationName || res.user.name,
+          address: res.user.address,
+          avatar: res.user.profileDetails?.avatar,
+          safetyLicense: res.user.profileDetails?.safetyLicense,
+          taxId: res.user.profileDetails?.taxId,
+          preferences: res.user.preferences,
+        };
+        setCurrentUser(userObj);
+        showToast(`Welcome back, ${res.user.name}!`, 'success');
         setIsLoading(false);
-        return { success: false, message: err.message };
+        return { success: true, user: userObj };
       }
+      setIsLoading(false);
+      return { success: false, message: 'Invalid response received from server.' };
+    } catch (err) {
+      const errorMsg = err.message || 'Login failed. Please verify your email and password.';
+      showToast(errorMsg, 'error');
+      setIsLoading(false);
+      return { success: false, message: errorMsg };
     }
-
-    // Fallback: local demo login
-    const foundDemo = Object.values(DEMO_USERS).find(u => u.email === credentials.email);
-    const userToSet = foundDemo || {
-      id: `user-${Date.now()}`,
-      name: credentials.email.split('@')[0],
-      email: credentials.email,
-      role: 'donor',
-      organization: 'Local Kitchen Partner',
-    };
-    setCurrentUser(userToSet);
-    showToast(`Signed in in Offline Demo Mode as ${userToSet.name}`, 'info');
-    setIsLoading(false);
-    return { success: true, user: userToSet };
   };
 
-  // Real or mock registration
+  // Real API registration
   const registerUser = async (registrationData) => {
     setIsLoading(true);
     try {
-      if (apiStatus === 'connected') {
-        const res = await api.auth.register(registrationData);
-        if (res.user) {
-          const userObj = {
-            id: res.user._id,
-            name: res.user.name,
-            email: res.user.email,
-            role: res.user.role,
-            organization: res.user.organizationName || res.user.name,
-            address: res.user.address,
-            avatar: res.user.profileDetails?.avatar,
-            safetyLicense: res.user.profileDetails?.safetyLicense,
-            taxId: res.user.profileDetails?.taxId,
-          };
-          setCurrentUser(userObj);
-          showToast(`Account registered successfully on MongoDB!`, 'success');
-          setIsLoading(false);
-          return { success: true, user: userObj };
-        }
-      }
-    } catch (err) {
-      if (!err.isOffline) {
-        showToast(err.message || 'Registration failed', 'error');
+      const res = await api.auth.register(registrationData);
+      if (res && res.user) {
+        const userObj = {
+          id: res.user._id,
+          name: res.user.name,
+          email: res.user.email,
+          role: res.user.role,
+          organization: res.user.organizationName || res.user.name,
+          address: res.user.address,
+          avatar: res.user.profileDetails?.avatar,
+          safetyLicense: res.user.profileDetails?.safetyLicense,
+          taxId: res.user.profileDetails?.taxId,
+          preferences: res.user.preferences,
+        };
+        setCurrentUser(userObj);
+        showToast('Account registered successfully on MongoDB!', 'success');
         setIsLoading(false);
-        return { success: false, message: err.message };
+        return { success: true, user: userObj };
       }
+      setIsLoading(false);
+      return { success: false, message: 'Registration failed.' };
+    } catch (err) {
+      const errorMsg = err.message || 'Registration failed.';
+      showToast(errorMsg, 'error');
+      setIsLoading(false);
+      return { success: false, message: errorMsg };
     }
-
-    // Fallback: local demo registration
-    const newUser = {
-      id: `user-${Date.now()}`,
-      name: registrationData.name,
-      email: registrationData.email,
-      role: registrationData.role || 'donor',
-      organization: registrationData.organizationName || registrationData.organization || 'Community Member',
-      address: registrationData.address || '',
-      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
-    };
-    setCurrentUser(newUser);
-    showToast(`Registered in Demo Mode as ${newUser.name}`, 'info');
-    setIsLoading(false);
-    return { success: true, user: newUser };
   };
 
   const customLogin = (userData) => {

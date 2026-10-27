@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   ShieldCheck, 
   AlertTriangle, 
@@ -13,16 +13,46 @@ import {
   Award, 
   Clock, 
   Eye,
-  Settings
+  Settings,
+  Loader2
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { TiltCard } from '../components/3d/TiltCard';
+import api from '../services/api';
 
 export const AdminDashboard = () => {
-  const { donations, setSelectedDonation, totalMealsSaved } = useApp();
+  const navigate = useNavigate();
+  const { currentUser, donations, setSelectedDonation, totalMealsSaved, showToast, apiStatus } = useApp();
 
   const [auditFilter, setAuditFilter] = useState('all');
   const [approvedList, setApprovedList] = useState([]);
+  const [reports, setReports] = useState([]);
+  const [isVerifyingAdmin, setIsVerifyingAdmin] = useState(false);
+
+  useEffect(() => {
+    const verifyAdminAccess = async () => {
+      if (apiStatus === 'connected') {
+        try {
+          setIsVerifyingAdmin(true);
+          const res = await api.reports.getAll();
+          if (res && res.data) {
+            setReports(res.data);
+          }
+        } catch (err) {
+          if (err.status === 401 || err.status === 403) {
+            showToast('Access Denied: Administrative privileges required.', 'error');
+            if (currentUser?.role === 'donor') navigate('/donor-dashboard', { replace: true });
+            else if (currentUser?.role === 'recipient') navigate('/recipient-dashboard', { replace: true });
+            else navigate('/login', { replace: true });
+          }
+        } finally {
+          setIsVerifyingAdmin(false);
+        }
+      }
+    };
+
+    verifyAdminAccess();
+  }, [apiStatus, currentUser, navigate, showToast]);
 
   const pendingVerificationKitchens = [];
 

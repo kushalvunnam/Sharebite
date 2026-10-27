@@ -80,11 +80,24 @@ export const LoginPage = () => {
     }
   };
 
-  // 1-Click Fast Hackathon Demo Login
-  const handleDemoLogin = (roleKey) => {
+  // 1-Click Fast Hackathon Demo Login with real backend token acquisition
+  const handleDemoLogin = async (roleKey) => {
     setErrorMessage('');
-    switchRole(roleKey);
-    redirectAfterLogin(roleKey);
+    let creds = { email: 'marco@verdeosteria.com', password: 'DonorPassword123!' };
+    if (roleKey === 'recipient') {
+      creds = { email: 'sarah@eastsidehope.org', password: 'ShelterPassword123!' };
+    } else if (roleKey === 'admin') {
+      creds = { email: 'david.safety@sharebite.org', password: 'AdminPassword123!' };
+    }
+
+    const res = await loginUser(creds);
+    if (res.success) {
+      redirectAfterLogin(roleKey);
+    } else {
+      // Offline fallback if backend server is not active
+      switchRole(roleKey);
+      redirectAfterLogin(roleKey);
+    }
   };
 
   // Traditional credentials login
