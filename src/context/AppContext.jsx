@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { 
   INITIAL_DONATIONS, 
   INITIAL_DONORS, 
@@ -6,6 +6,7 @@ import {
   INITIAL_NOTIFICATIONS,
   IMPACT_METRICS 
 } from '../data/demoData';
+import api from '../services/api';
 
 const AppContext = createContext();
 
@@ -48,6 +49,11 @@ export const DEMO_USERS = {
 };
 
 export const AppProvider = ({ children }) => {
+  // Backend connectivity state
+  const [apiStatus, setApiStatus] = useState('checking'); // 'checking' | 'connected' | 'offline'
+  const [apiHealth, setApiHealth] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
   // Load donations from localStorage or fallback
   const [donations, setDonations] = useState(() => {
     try {
@@ -78,6 +84,9 @@ export const AppProvider = ({ children }) => {
     }
   });
 
+  // Active user's donation requests (from backend)
+  const [myRequests, setMyRequests] = useState([]);
+
   // Modals & UI states
   const [selectedDonation, setSelectedDonation] = useState(null);
   const [isPostWizardOpen, setIsPostWizardOpen] = useState(false);
@@ -104,11 +113,160 @@ export const AppProvider = ({ children }) => {
     }, 4500);
   };
 
+  // Check backend health and sync live data if available
+  const checkBackend = useCallback(async () => {
+    try {
+      const health = await api.checkHealth();
+      setApiStatus('connected');
+      setApiHealth(health);
+
+      // Fetch live listings if connected
+      try {
+        const res = await api.listings.getAll();
+        if (res && res.data && res.data.length > 0) {
+          // Normalize backend listings to frontend schema
+          const normalized = res.data.map((l) => ({
+            id: l._id || l.id,
+            _id: l._id,
+            title: l.title,
+            category: l.category,
+            donorId: l.donorId?._id || l.donorId,
+            donorName: l.donorId?.organizationName || l.donorId?.name || "Verified Kitchen",
+            donorType: l.donorId?.profileDetails?.orgType || "Food Establishment",
+            servings: l.quantity,
+            weightKg: l.weightKg || 0,
+            status: l.status === 'fully_reserved' ? 'claimed' : l.status,
+            urgency: 'urgent',
+            timeRemainingMins: 90,
+            pickupWindow: `${new Date(l.pickupStart).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(l.pickupEnd).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+            storageType: l.storageType,
+            packaging: l.packaging,
+            allergens: l.allergens || ['None'],
+            dietaryTags: l.dietaryTags || [],
+            description: l.description,
+            temperatureLog: l.temperatureLog,
+            distance: "1.2 km away",
+            address: l.pickupAddress,
+            imageUrl: l.imageUrl,
+            verificationCode: "SB-4892",
+            otpCode: "749210",
+            createdAt: l.createdAt,
+          }));
+          setDonations(normalized);
+        }
+      } catch {
+        // use local cache if listings fetch fails
+      }
+    } catch {
+      setApiStatus('offline');
+      setApiHealth(null);
+    }
+  }, []);
+
+  useEffect(() => {
+    checkBackend();
+  }, [checkBackend]);
+
   const switchRole = (roleKey) => {
     if (DEMO_USERS[roleKey]) {
       setCurrentUser(DEMO_USERS[roleKey]);
-      showToast(`Switched account to ${DEMO_USERS[roleKey].name} (${DEMO_USERS[roleKey].role.toUpperCase()})`, 'info');
+      showToast(`Switched demo account to ${DEMO_USERS[roleKey].name} (${DEMO_USERS[roleKey].role.toUpperCase()})`, 'info');
     }
+  };
+
+  // Real or mock login
+  const loginUser = async (credentials) => {
+    setIsLoading(true);
+    try {
+      if (apiStatus === 'connected') {
+        const res = await api.auth.login(credentials);
+        if (res.user) {
+          const userObj = {
+            id: res.user._id,
+            name: res.user.name,
+            email: res.user.email,
+            role: res.user.role,
+            organization: res.user.organizationName || res.user.name,
+            address: res.user.address,
+            avatar: res.user.profileDetails?.avatar,
+            safetyLicense: res.user.profileDetails?.safetyLicense,
+            taxId: res.user.profileDetails?.taxId,
+          };
+          setCurrentUser(userObj);
+          showToast(`Welcome back, ${res.user.name}!`, 'success');
+          setIsLoading(false);
+          return { success: true, user: userObj };
+        }
+      }
+    } catch (err) {
+      if (!err.isOffline) {
+        showToast(err.message || 'Login failed', 'error');
+        setIsLoading(false);
+        return { success: false, message: err.message };
+      }
+    }
+
+    // Fallback: local demo login
+    const foundDemo = Object.values(DEMO_USERS).find(u => u.email === credentials.email);
+    const userToSet = foundDemo || {
+      id: `user-${Date.now()}`,
+      name: credentials.email.split('@')[0],
+      email: credentials.email,
+      role: 'donor',
+      organization: 'Local Kitchen Partner',
+    };
+    setCurrentUser(userToSet);
+    showToast(`Signed in in Offline Demo Mode as ${userToSet.name}`, 'info');
+    setIsLoading(false);
+    return { success: true, user: userToSet };
+  };
+
+  // Real or mock registration
+  const registerUser = async (registrationData) => {
+    setIsLoading(true);
+    try {
+      if (apiStatus === 'connected') {
+        const res = await api.auth.register(registrationData);
+        if (res.user) {
+          const userObj = {
+            id: res.user._id,
+            name: res.user.name,
+            email: res.user.email,
+            role: res.user.role,
+            organization: res.user.organizationName || res.user.name,
+            address: res.user.address,
+            avatar: res.user.profileDetails?.avatar,
+            safetyLicense: res.user.profileDetails?.safetyLicense,
+            taxId: res.user.profileDetails?.taxId,
+          };
+          setCurrentUser(userObj);
+          showToast(`Account registered successfully on MongoDB!`, 'success');
+          setIsLoading(false);
+          return { success: true, user: userObj };
+        }
+      }
+    } catch (err) {
+      if (!err.isOffline) {
+        showToast(err.message || 'Registration failed', 'error');
+        setIsLoading(false);
+        return { success: false, message: err.message };
+      }
+    }
+
+    // Fallback: local demo registration
+    const newUser = {
+      id: `user-${Date.now()}`,
+      name: registrationData.name,
+      email: registrationData.email,
+      role: registrationData.role || 'donor',
+      organization: registrationData.organizationName || registrationData.organization || 'Community Member',
+      address: registrationData.address || '',
+      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
+    };
+    setCurrentUser(newUser);
+    showToast(`Registered in Demo Mode as ${newUser.name}`, 'info');
+    setIsLoading(false);
+    return { success: true, user: newUser };
   };
 
   const customLogin = (userData) => {
@@ -117,18 +275,37 @@ export const AppProvider = ({ children }) => {
   };
 
   const logout = () => {
+    api.auth.logout();
     setCurrentUser(null);
     showToast('Logged out successfully', 'info');
   };
 
   // Claim a donation
-  const claimDonation = (donationId, recipientName) => {
+  const claimDonation = async (donationId, recipientName) => {
     const claimer = recipientName || currentUser?.organization || "Eastside Hope Food Rescue";
     const verificationCode = `SB-${Math.floor(1000 + Math.random() * 9000)}`;
     const otpCode = `${Math.floor(100000 + Math.random() * 900000)}`;
 
+    const targetDonation = donations.find(d => d.id === donationId || d._id === donationId);
+
+    // Try real API if connected and has MongoDB _id
+    if (apiStatus === 'connected' && targetDonation?._id) {
+      try {
+        await api.requests.create({
+          listingId: targetDonation._id,
+          requestedQuantity: targetDonation.servings || 10,
+          notes: `Reserved by ${claimer}`,
+        });
+      } catch (err) {
+        if (!err.isOffline) {
+          showToast(`API: ${err.message}`, 'error');
+        }
+      }
+    }
+
+    // Update local state
     setDonations(prev => prev.map(item => {
-      if (item.id === donationId) {
+      if (item.id === donationId || item._id === donationId) {
         return {
           ...item,
           status: 'claimed',
@@ -145,7 +322,7 @@ export const AppProvider = ({ children }) => {
     const newNotif = {
       id: `notif-${Date.now()}`,
       title: '🎉 Surplus Reserved Successfully!',
-      message: `${claimer} has reserved "${donations.find(d => d.id === donationId)?.title}". Pickup verification code is ${verificationCode}.`,
+      message: `${claimer} has reserved "${targetDonation?.title || 'Food listing'}". Pickup verification code is ${verificationCode}.`,
       timestamp: 'Just now',
       read: false,
       type: 'success',
@@ -157,8 +334,8 @@ export const AppProvider = ({ children }) => {
   };
 
   // Complete / Handoff verification
-  const completeDonation = (donationId, enteredOtp) => {
-    const item = donations.find(d => d.id === donationId);
+  const completeDonation = async (donationId, enteredOtp) => {
+    const item = donations.find(d => d.id === donationId || d._id === donationId);
     if (!item) return { success: false, message: "Listing not found" };
 
     if (item.otpCode && enteredOtp && item.otpCode.trim() !== enteredOtp.trim()) {
@@ -167,7 +344,7 @@ export const AppProvider = ({ children }) => {
     }
 
     setDonations(prev => prev.map(d => {
-      if (d.id === donationId) {
+      if (d.id === donationId || d._id === donationId) {
         return {
           ...d,
           status: 'completed',
@@ -193,32 +370,58 @@ export const AppProvider = ({ children }) => {
   };
 
   // Add a new surplus listing
-  const addDonation = (donationData) => {
-    const id = `DON-${Math.floor(100 + Math.random() * 900)}`;
+  const addDonation = async (donationData) => {
+    const now = Date.now();
+    const payload = {
+      title: donationData.title,
+      description: donationData.description || "Fresh surplus prepared food safely packaged for donation.",
+      category: donationData.category || "Prepared Meals",
+      quantity: Number(donationData.servings) || 30,
+      unit: "servings",
+      weightKg: Number(donationData.weightKg) || 12,
+      pickupAddress: currentUser?.address || donationData.address || "412 Mulberry St, Downtown",
+      pickupStart: new Date(now + 1800000).toISOString(),
+      pickupEnd: new Date(now + 14400000).toISOString(),
+      handlingInstructions: donationData.storageType || "Refrigerated Chilled (< 40°F)",
+      expiryGuidance: "Consume or refrigerate within 2 hours",
+      allergens: Array.isArray(donationData.allergens) ? donationData.allergens : [donationData.allergens || "None"],
+      dietaryTags: donationData.dietaryTags || ["Vegetarian"],
+      storageType: donationData.storageType || "Refrigerated Chilled (< 40°F / 4°C)",
+      temperatureLog: donationData.temperatureLog || "Safe temperature logged at preparation.",
+      packaging: donationData.packaging || "Sanitized food-grade sealed containers",
+      imageUrl: donationData.imageUrl || "https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=800&q=80",
+    };
+
+    let backendId = null;
+
+    if (apiStatus === 'connected') {
+      try {
+        const res = await api.listings.create(payload);
+        if (res && res.data) {
+          backendId = res.data._id;
+        }
+      } catch (err) {
+        if (!err.isOffline) {
+          showToast(`Server note: ${err.message}`, 'info');
+        }
+      }
+    }
+
+    const id = backendId || `DON-${Math.floor(100 + Math.random() * 900)}`;
     const newDonation = {
       id,
-      title: donationData.title,
-      category: donationData.category || "Prepared Meals",
+      _id: backendId,
+      ...payload,
       donorId: currentUser?.id || "donor-1",
       donorName: currentUser?.organization || "Verde Artisan Osteria",
       donorType: currentUser?.orgType || "Restaurant & Trattoria",
-      servings: Number(donationData.servings) || 30,
-      weightKg: Number(donationData.weightKg) || 12,
+      servings: payload.quantity,
       status: "available",
       urgency: donationData.urgency || "urgent",
       timeRemainingMins: Number(donationData.timeRemainingMins) || 90,
       pickupWindow: donationData.pickupWindow || "Today, 6:00 PM - 8:00 PM",
-      storageType: donationData.storageType || "Refrigerated Chilled (< 40°F)",
-      packaging: donationData.packaging || "Sanitized food-grade sealed containers",
-      allergens: donationData.allergens || ["None"],
-      dietaryTags: donationData.dietaryTags || ["Vegetarian"],
-      description: donationData.description || "Fresh surplus prepared food safely packaged for donation.",
-      temperatureLog: donationData.temperatureLog || "Safe temperature logged at preparation.",
       distance: "1.0 km away",
-      address: currentUser?.address || "412 Mulberry St, Downtown",
-      imageUrl: donationData.imageUrl || "https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=800&q=80",
-      claimedBy: null,
-      claimTime: null,
+      address: payload.pickupAddress,
       verificationCode: `SB-${Math.floor(1000 + Math.random() * 9000)}`,
       otpCode: `${Math.floor(100000 + Math.random() * 900000)}`,
       createdAt: new Date().toISOString()
@@ -245,7 +448,7 @@ export const AppProvider = ({ children }) => {
   // Cancel reservation
   const cancelClaim = (donationId) => {
     setDonations(prev => prev.map(item => {
-      if (item.id === donationId) {
+      if (item.id === donationId || item._id === donationId) {
         return {
           ...item,
           status: 'available',
@@ -266,6 +469,7 @@ export const AppProvider = ({ children }) => {
     localStorage.removeItem('sharebite_donations');
     localStorage.removeItem('sharebite_user');
     localStorage.removeItem('sharebite_notifs');
+    localStorage.removeItem('sharebite_token');
     showToast('Demo data restored to initial state', 'info');
   };
 
@@ -291,6 +495,8 @@ export const AppProvider = ({ children }) => {
         activeToast,
         showToast,
         switchRole,
+        loginUser,
+        registerUser,
         customLogin,
         logout,
         claimDonation,
@@ -300,6 +506,10 @@ export const AppProvider = ({ children }) => {
         resetDemoData,
         totalMealsSaved,
         availableListingsCount,
+        apiStatus,
+        apiHealth,
+        checkBackend,
+        isLoading,
       }}
     >
       {children}

@@ -1,114 +1,143 @@
 # ShareBite — Share more. Waste less. 🍲🌱
 
-A food surplus donation and redistribution platform connecting restaurants, caterers, grocery stores, and community kitchens with NGOs and charitable shelters in real-time.
+A full-stack food surplus donation and redistribution platform connecting commercial kitchens, restaurants, bakeries, caterers, and grocery stores with NGOs, food pantries, and emergency shelters in real-time.
 
 ![ShareBite](https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=1200&q=80)
 
 ---
 
-## 🌟 Vision & Key Highlights
+## 🌟 Architecture Overview
 
-Global commercial food waste accounts for **8–10% of total greenhouse gas emissions**, while hundreds of thousands of community shelters struggle with nutrition security. 
-
-**ShareBite** bridges this gap in under 60 seconds by combining:
-1. **Interactive 3D-Inspired UI**: Floating depth food bowl, dynamic specular glare tilt cards, and a live geospatial redistribution graph.
-2. **Instant Hyperlocal Matching**: Connects hot prepared meals, morning artisan bakes, and fresh produce within a 5km radius before expiry.
-3. **Verified Food Safety & Legal Shield**: Full statutory protection under the **Bill Emerson Good Samaritan Food Act (42 U.S. Code § 1791)** with certified HACCP temperature logging.
-4. **Frictionless Handoff**: 6-digit OTP codes and pickup verification passes for volunteer speed.
-5. **ESG & Tax Deduction Engine**: Generates automated IRS Sec. 170(e)(3) compliance reports and environmental footprint certificates.
-
----
-
-## 🎨 Brand & Design System
-
-- **Primary Colors**:
-  - Deep Forest Green: `#0f392b` / `#164e3b`
-  - Fresh Lime: `#84cc16` / `#a3e635`
-- **Secondary & Accent Colors**:
-  - Warm Ivory: `#faf7f2`
-  - Subtle Warm Amber / Orange: `#f97316`
-  - Crisp White: `#ffffff`
-- **Typography**: Bold modern headings (**Outfit**) with clean, accessible body text (**Plus Jakarta Sans**).
-- **3D Mechanics**: Lightweight CSS 3D transforms (`preserve-3d`, `perspective: 1000px`, dynamic mouse tracking, specular lighting glare, depth layers). Respects `prefers-reduced-motion`.
+```
+ShareBite/
+├── backend/                     # Node.js + Express + MongoDB Atlas backend
+│   ├── config/                  # Mongoose database connection & status
+│   ├── controllers/             # Auth, Listings, Requests, Reports controllers
+│   ├── middleware/              # JWT auth, role RBAC, input validation, error handling
+│   ├── models/                  # Mongoose schemas (User, FoodListing, DonationRequest, Report)
+│   ├── routes/                  # Express REST route definitions
+│   ├── scripts/                 # Repeatable seed script (10+ listings, 3+ NGOs)
+│   ├── tests/                   # Automated Node test runner suite (24 tests)
+│   ├── .env.example             # Environment configuration template
+│   ├── package.json             # Backend package configuration
+│   └── server.js                # Express app entry & health monitoring
+├── src/                         # React 19 + Vite 8 frontend
+│   ├── components/              # 3D food bowl hero, tilt cards, community network map
+│   ├── context/                 # AppContext (central state with live API & offline fallback)
+│   ├── pages/                   # Landing, Explore, Donor Hub, Recipient Hub, Admin Board
+│   └── services/api.js          # Centralized API client (VITE_API_BASE_URL)
+└── package.json                 # Unified monorepo scripts
+```
 
 ---
 
-## 🛠️ Technology Stack
-
-- **Frontend**: React 19 + Vite 8 (JavaScript)
-- **Styling**: Tailwind CSS v4 + `@tailwindcss/vite`
-- **Routing**: React Router v7
-- **Icons**: Lucide React
-- **Animations**: Framer Motion
-- **Micro-Interactions**: Canvas Confetti
-- **Backend Ready**: Node.js + Express REST API with MongoDB Mongoose schemas
-
----
-
-## 🚀 Quick Start Guide
+## 🚀 Running the Project
 
 ### 1. Install Dependencies
 ```bash
 npm install
 ```
 
-### 2. Launch the Development Server
+### 2. Configure Backend Environment
+Copy the backend `.env.example` to `.env`:
 ```bash
-npm run dev
+cp backend/.env.example backend/.env
 ```
-Open [http://localhost:5173](http://localhost:5173) in your browser.
-
-### 3. Production Build
-```bash
-npm run build
+Fill in your environment variables:
+```env
+PORT=5000
+MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/sharebite?retryWrites=true&w=majority
+JWT_SECRET=your_super_secret_jwt_key_here_min_32_chars
+CLIENT_URL=http://localhost:5173
+NODE_ENV=development
 ```
+*(Never commit `.env` files. Both root and nested `.env` files are strictly excluded by `.gitignore`.)*
 
-### 4. Optional Express Backend Server
+### 3. Start the Backend API Server
 ```bash
 npm run server
 ```
-Runs the REST API at [http://localhost:5000](http://localhost:5000).
+Server starts on [http://localhost:5000](http://localhost:5000).  
+Check health status at [http://localhost:5000/api/health](http://localhost:5000/api/health).
+
+For live development with auto-reloading:
+```bash
+npm run server:dev
+```
+
+### 4. Start the Frontend Client
+In a separate terminal:
+```bash
+npm run dev
+```
+Client runs at [http://localhost:5173](http://localhost:5173).
+
+### 5. Seed Initial Data (Repeatable)
+Seeds the database with 8 user accounts (Admin, Donors, Recipients), 10+ compliant food listings, and sample donation requests:
+```bash
+npm run seed
+```
+To explicitly reset and re-seed:
+```bash
+npm run seed:force
+```
+
+### 6. Run Backend Automated Test Suite
+Executes 24 automated tests across authentication security, role permissions, listing validation, atomic portion reservations, and OTP handoff completion:
+```bash
+npm run test:backend
+```
 
 ---
 
-## 👥 Hackathon Demo Roles (1-Click Switcher)
+## 📡 REST API Reference
 
-Use the top-right **Role Switcher** on the navbar or the `/login` page to test all three perspectives:
+### Health
+- `GET /api/health` — Service uptime, version, and MongoDB connection status.
 
-1. **👨‍🍳 Donor Kitchen (Chef Marco Rossi)**:
-   - **Organization**: Verde Artisan Osteria
-   - **Features**: List surplus food in 60s wizard, set temperature logs, track claimed batches, verify volunteer OTP tokens, download tax certificates.
-2. **🏢 Recipient NGO (Sarah Lin)**:
-   - **Organization**: Eastside Hope Food Rescue & Shelter
-   - **Features**: Browse live surplus, 1-click claim, generate pickup QR pass & 6-digit OTP code, route instructions.
-3. **🛡️ Admin Safety Oversight (David Vance)**:
-   - **Organization**: ShareBite Safety & Operations Board
-   - **Features**: Audit queue for donor food handler licenses, 501(c)(3) verification, platform KPIs, and live temperature compliance monitoring.
+### Authentication (`/api/auth`)
+- `POST /api/auth/register` — Register donor or recipient account. Validates email normalization, password hash, and **strictly blocks public admin role assignment**.
+- `POST /api/auth/login` — Sign in with bcrypt verification, returns signed JWT.
+- `GET /api/auth/me` — Retrieve authenticated user profile (Bearer token).
 
----
+### Food Listings (`/api/listings`)
+- `GET /api/listings` — Filter surplus listings by `search`, `category`, `status`, or `donorId`.
+- `GET /api/listings/:id` — Retrieve detailed listing with donor contact and handling instructions.
+- `POST /api/listings` — Authenticated donor creates surplus listing with verified pickup windows.
+- `PATCH /api/listings/:id` — Update listing details (ownership guard enforced).
+- `DELETE /api/listings/:id` — Remove listing (blocked if active accepted pickups exist).
 
-## 📋 Platform Modules Tour
+### Donation Requests (`/api/requests`)
+- `POST /api/requests` — Recipient reserves surplus portions with atomic database reservation limits. Generates 6-digit OTP and pickup pass.
+- `GET /api/requests/my` — Retrieve authenticated user's requests.
+- `PATCH /api/requests/:id/accept` — Donor accepts pending reservation.
+- `PATCH /api/requests/:id/reject` — Donor rejects request and **atomically releases reserved portions**.
+- `PATCH /api/requests/:id/cancel` — Recipient/donor cancels and **releases portions back to inventory**.
+- `PATCH /api/requests/:id/pickup` — Mark volunteer arrival / pickup in progress.
+- `PATCH /api/requests/:id/complete` — Donor verifies volunteer's 6-digit OTP code and completes handoff.
 
-| Route | Feature | Description |
-|---|---|---|
-| `/` | **Landing Page** | 3D food bowl hero, live impact stats, autonomous network map, featured surplus, 3-step guide, and legal notice |
-| `/explore` | **Surplus Catalog** | Real-time filters (category, dietary tags, urgency &lt;90m, proximity) with Grid and Live Map view modes |
-| `/donor-dashboard` | **Donor Hub** | Surplus posting wizard, active batch tracker, OTP handoff verification, IRS tax receipt export |
-| `/recipient-dashboard` | **NGO Shelter Hub** | Reserved pickup passes with OTP handoff codes, route details, and open donation claim radar |
-| `/admin` | **Admin Board** | Platform safety metrics, license audit queue, compliance score, and temperature log ledger |
-| `/impact` | **Impact & Calculator** | 100,000-meal community goal progress, CO2/water/trees metrics, interactive calculator, ESG certificate export |
-| `/safety` | **Safety & Legal Shield** | Bill Emerson Good Samaritan Act breakdown, FDA temperature danger zones, interactive kitchen self-audit checklist |
-| `/login` & `/register` | **Authentication** | Tailored multi-role registration and instant 1-click demo logins |
-
----
-
-## 📜 Compliance & Legal Shield
-
-All donations facilitated by ShareBite are protected under:
-- **Bill Emerson Good Samaritan Food Donation Act (42 U.S. Code § 1791)**
-- **Food Donation Improvement Act of 2023 (FDIA)**
-- **Internal Revenue Code (IRC) Section 170(e)(3)** for enhanced corporate deductions
+### Safety Reports (`/api/reports`)
+- `POST /api/reports` — Submit food safety or accuracy report on a listing.
+- `GET /api/reports` — Admin oversight queue.
+- `PATCH /api/reports/:id` — Admin resolution action.
 
 ---
 
-*ShareBite — Share more. Waste less.*
+## 👥 Seeded Demo Credentials
+
+| Role | Email | Password | Organization |
+|---|---|---|---|
+| **Admin** | `admin@sharebite.org` | `AdminPassword123!` | ShareBite Platform Safety Board |
+| **Donor** | `marco@verdeosteria.com` | `DonorPassword123!` | Verde Artisan Osteria |
+| **Donor** | `claire@goldenharvest.com` | `DonorPassword123!` | Golden Harvest Boulangerie |
+| **Recipient** | `sarah@eastsidehope.org` | `RecipientPassword123!` | Eastside Hope Food Rescue & Shelter |
+| **Recipient** | `thomas@breadbasket.org` | `RecipientPassword123!` | Community Breadbasket Hub |
+
+---
+
+## 🛡️ Security & Reliability Features
+- **Strict Role Boundaries**: Public registration cannot assign the Admin role.
+- **Password Protection**: Passwords hashed using `bcrypt` (cost factor 10) and omitted from standard queries (`select: false`).
+- **Token Integrity**: Standard Bearer JWT verification with expiration handling.
+- **Atomic Operations**: Over-reservation is prevented using atomic conditional updates (`$expr` and `$inc`).
+- **Resilient Fallback**: If the MongoDB database or backend is temporarily offline, the frontend seamlessly displays a clear **"Demo Mode (Offline)"** badge while preserving full 3D interactive functionality.

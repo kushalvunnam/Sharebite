@@ -26,7 +26,10 @@ export const Navbar = () => {
     setIsNotificationOpen, 
     availableListingsCount,
     setIsPostWizardOpen,
-    resetDemoData
+    resetDemoData,
+    apiStatus,
+    apiHealth,
+    checkBackend
   } = useApp();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -137,6 +140,28 @@ export const Navbar = () => {
 
         {/* Right Action Cluster */}
         <div className="flex items-center gap-3">
+          {/* Backend Connectivity Status Badge */}
+          <button
+            onClick={checkBackend}
+            title={
+              apiStatus === 'connected'
+                ? `Connected to MongoDB Atlas (${apiHealth?.database || 'live'})`
+                : 'Backend is offline. Using local simulated demo data. Click to reconnect.'
+            }
+            className={`hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border transition-all ${
+              apiStatus === 'connected'
+                ? 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100'
+                : 'bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100'
+            }`}
+          >
+            <span
+              className={`w-2 h-2 rounded-full ${
+                apiStatus === 'connected' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
+              }`}
+            />
+            <span>{apiStatus === 'connected' ? 'MongoDB Live' : 'Demo Mode (Offline)'}</span>
+          </button>
+
           {/* Notification Bell */}
           <button
             onClick={() => setIsNotificationOpen(true)}

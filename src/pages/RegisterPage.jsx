@@ -16,7 +16,7 @@ import { useApp } from '../context/AppContext';
 import Logo from '../components/common/Logo';
 
 export const RegisterPage = () => {
-  const { customLogin } = useApp();
+  const { registerUser, isLoading } = useApp();
   const navigate = useNavigate();
 
   const [role, setRole] = useState('donor');
@@ -32,26 +32,32 @@ export const RegisterPage = () => {
     hasColdStorage: true
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const newUser = {
-      id: `user-${Date.now()}`,
+    const payload = {
       name: formData.name || "Kitchen Representative",
       email: formData.email,
+      password: formData.password,
       role: role,
-      organization: formData.organization || (role === 'donor' ? "Gourmet Bistro" : "Community Kitchen"),
-      orgType: formData.orgType,
+      organizationName: formData.organization || (role === 'donor' ? "Gourmet Bistro" : "Community Kitchen"),
       address: formData.address || "123 Civic Center Way",
-      safetyLicense: formData.licenseNumber || "FDA-NYC-Pending",
-      taxId: formData.licenseNumber || "EIN-Pending",
-      avatar: role === 'donor'
-        ? "https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&w=200&q=80"
-        : "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80"
+      profileDetails: {
+        orgType: formData.orgType,
+        safetyLicense: formData.licenseNumber || "FDA-NYC-Pending",
+        taxId: formData.licenseNumber || "EIN-Pending",
+        dailyCapacity: Number(formData.dailyCapacity) || 200,
+        hasRefrigeration: formData.hasColdStorage,
+        avatar: role === 'donor'
+          ? "https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&w=200&q=80"
+          : "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80"
+      }
     };
 
-    customLogin(newUser);
-    if (role === 'donor') navigate('/donor-dashboard');
-    else navigate('/recipient-dashboard');
+    const res = await registerUser(payload);
+    if (res.success) {
+      if (role === 'donor') navigate('/donor-dashboard');
+      else navigate('/recipient-dashboard');
+    }
   };
 
   return (

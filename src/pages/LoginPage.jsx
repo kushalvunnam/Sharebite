@@ -14,12 +14,12 @@ import { useApp, DEMO_USERS } from '../context/AppContext';
 import Logo from '../components/common/Logo';
 
 export const LoginPage = () => {
-  const { customLogin, switchRole } = useApp();
+  const { customLogin, switchRole, loginUser, isLoading } = useApp();
   const navigate = useNavigate();
 
   const [selectedRole, setSelectedRole] = useState('donor');
   const [email, setEmail] = useState('marco@verdeosteria.com');
-  const [password, setPassword] = useState('••••••••••');
+  const [password, setPassword] = useState('DonorPassword123!');
 
   const handleDemoLogin = (roleKey) => {
     switchRole(roleKey);
@@ -28,17 +28,15 @@ export const LoginPage = () => {
     else navigate('/admin');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const demoProfile = DEMO_USERS[selectedRole];
-    customLogin({
-      ...demoProfile,
-      email: email || demoProfile.email
-    });
-
-    if (selectedRole === 'donor') navigate('/donor-dashboard');
-    else if (selectedRole === 'recipient') navigate('/recipient-dashboard');
-    else navigate('/admin');
+    const res = await loginUser({ email, password });
+    if (res.success) {
+      const targetRole = res.user?.role || selectedRole;
+      if (targetRole === 'donor') navigate('/donor-dashboard');
+      else if (targetRole === 'recipient') navigate('/recipient-dashboard');
+      else navigate('/admin');
+    }
   };
 
   return (
