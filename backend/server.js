@@ -51,16 +51,45 @@ app.use(
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Root endpoint
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'online',
+    service: 'ShareBite REST API',
+    version: '2.0.0',
+    health: '/api/health',
+  });
+});
+
+// Health alias
+app.get('/health', (req, res) => {
+  res.redirect('/api/health');
+});
+
 // Health endpoint
 app.get('/api/health', (req, res) => {
+  const dbStatus = getDBStatus();
   res.status(200).json({
-    status: 'healthy',
+    status: dbStatus === 'connected' ? 'healthy' : 'degraded',
     service: 'ShareBite REST API',
     version: '2.0.0',
     uptime: Math.floor(process.uptime()),
     timestamp: new Date().toISOString(),
-    database: getDBStatus(),
+    database: dbStatus,
   });
+});
+
+// Database connection readiness check middleware for API routes
+app.use('/api', (req, res, next) => {
+  if (req.path === '/health') return next();
+  if (getDBStatus() !== 'connected') {
+    return res.status(503).json({
+      success: false,
+      message: 'Database service is currently unavailable or connecting. Please try again shortly.',
+      databaseStatus: getDBStatus(),
+    });
+  }
+  next();
 });
 
 // API Routes
@@ -76,7 +105,12 @@ app.use(notFound);
 app.use(errorHandler);
 
 // Connect database and start server (except when imported in tests)
-if (process.env.NODE_ENV !== 'test') {
+const isTestEnv =
+  process.env.NODE_ENV === 'test' ||
+  Boolean(process.env.NODE_TEST_CONTEXT) ||
+  process.argv.some((a) => a.includes('test'));
+
+if (!isTestEnv) {
   connectDB().then(() => {
     app.listen(PORT, () => {
       console.log(`[ShareBite API] Backend server running on port ${PORT}`);

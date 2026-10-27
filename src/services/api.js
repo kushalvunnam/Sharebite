@@ -3,7 +3,25 @@
  * Connects to Node.js + Express backend via VITE_API_BASE_URL
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+const resolveApiBaseUrl = () => {
+  let envUrl = (import.meta.env.VITE_API_BASE_URL || '').trim();
+  if (!envUrl) {
+    if (import.meta.env.PROD) {
+      envUrl = 'https://sharebite-backend.onrender.com/api';
+    } else {
+      envUrl = 'http://localhost:5000/api';
+    }
+  }
+  // Strip trailing slashes
+  envUrl = envUrl.replace(/\/+$/, '');
+  // Ensure /api suffix exists
+  if (!envUrl.endsWith('/api')) {
+    envUrl = `${envUrl}/api`;
+  }
+  return envUrl;
+};
+
+export const API_BASE_URL = resolveApiBaseUrl();
 
 class ApiError extends Error {
   constructor(message, status, data = null, isOffline = false) {
@@ -52,7 +70,8 @@ const request = async (endpoint, options = {}) => {
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout
+    // 18s timeout allows for Render free-tier cold-start wakeups
+    const timeoutId = setTimeout(() => controller.abort(), 18000);
     config.signal = controller.signal;
 
     const response = await fetch(url, config);
@@ -61,18 +80,32 @@ const request = async (endpoint, options = {}) => {
     const data = await response.json().catch(() => null);
 
     if (!response.ok) {
-      throw new ApiError(
-        data?.message || `Request failed with status ${response.status}`,
-        response.status,
-        data,
-        false
-      );
+      const errorMsg =
+        data?.message ||
+        data?.error ||
+        (response.status === 503
+          ? 'Backend service is starting up or temporarily unavailable. Please retry in a few moments.'
+          : `Request failed with status ${response.status}`);
+      throw new ApiError(errorMsg, response.status, data, false);
     }
 
     return data;
   } catch (error) {
-    if (error.name === 'AbortError' || error.name === 'TypeError' || error.message.includes('Failed to fetch')) {
-      throw new ApiError('Backend server is offline or unreachable.', 0, null, true);
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    if (
+      error.name === 'AbortError' ||
+      error.name === 'TypeError' ||
+      error.message?.includes('Failed to fetch') ||
+      error.message?.includes('NetworkError')
+    ) {
+      throw new ApiError(
+        'Backend server is unreachable or waking up. Please verify your internet connection or retry shortly.',
+        0,
+        null,
+        true
+      );
     }
     throw error;
   }

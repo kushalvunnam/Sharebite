@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   Utensils, 
@@ -12,45 +12,51 @@ import {
   Eye,
   EyeOff,
   AlertCircle,
-  CheckCircle2,
   X,
   Loader2,
   Info,
   LogOut
 } from 'lucide-react';
-import { useApp, DEMO_USERS } from '../context/AppContext';
+import { useApp } from '../context/AppContext';
 import Logo from '../components/common/Logo';
 
 export const LoginPage = () => {
-  const { currentUser, switchRole, loginUser, logout, isLoading, apiStatus } = useApp();
+  const { currentUser, loginUser, logout, isLoading, apiStatus } = useApp();
   const navigate = useNavigate();
   const location = useLocation();
 
   const [selectedRole, setSelectedRole] = useState('donor');
   const [email, setEmail] = useState(() => {
-    return localStorage.getItem('sharebite_saved_email') || 'marco@verdeosteria.com';
+    // Only restore previously remembered email, or pre-fill in dev
+    const remembered = localStorage.getItem('sharebite_saved_email');
+    if (remembered) return remembered;
+    return !import.meta.env.PROD ? 'marco@verdeosteria.com' : '';
   });
-  const [password, setPassword] = useState('DonorPassword123!');
+  const [password, setPassword] = useState(() => {
+    return !import.meta.env.PROD ? 'DonorPassword123!' : '';
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(() => {
-    return localStorage.getItem('sharebite_remember_me') !== 'false';
+    return localStorage.getItem('sharebite_remember_me') === 'true';
   });
   const [errorMessage, setErrorMessage] = useState('');
   const [forgotModalOpen, setForgotModalOpen] = useState(false);
 
-  // Sync role tab selection with demo credentials for convenience
+  // Sync role tab selection with demo credentials in dev environment
   const handleRoleTabClick = (roleKey) => {
     setSelectedRole(roleKey);
     setErrorMessage('');
-    if (roleKey === 'donor') {
-      setEmail('marco@verdeosteria.com');
-      setPassword('DonorPassword123!');
-    } else if (roleKey === 'recipient') {
-      setEmail('sarah@eastsidehope.org');
-      setPassword('ShelterPassword123!');
-    } else {
-      setEmail('david.safety@sharebite.org');
-      setPassword('AdminPassword123!');
+    if (!import.meta.env.PROD) {
+      if (roleKey === 'donor') {
+        setEmail('marco@verdeosteria.com');
+        setPassword('DonorPassword123!');
+      } else if (roleKey === 'recipient') {
+        setEmail('sarah@eastsidehope.org');
+        setPassword('ShelterPassword123!');
+      } else {
+        setEmail('david.safety@sharebite.org');
+        setPassword('AdminPassword123!');
+      }
     }
   };
 
@@ -94,9 +100,10 @@ export const LoginPage = () => {
     if (res.success) {
       redirectAfterLogin(roleKey);
     } else {
-      // Offline fallback if backend server is not active
-      switchRole(roleKey);
-      redirectAfterLogin(roleKey);
+      // Never switch role locally or simulate authentication when production request fails
+      setErrorMessage(
+        res.message || 'Unable to authenticate with backend service. Please check backend connectivity or try again.'
+      );
     }
   };
 
@@ -380,8 +387,16 @@ export const LoginPage = () => {
                 <span className="text-gray-600 font-medium">Remember my email</span>
               </label>
 
-              <span className="text-[10px] text-gray-400 font-medium">
-                {apiStatus === 'connected' ? 'Atlas Connected' : 'Simulated / Demo'}
+              <span className="text-[10px] font-bold">
+                {apiStatus === 'connected' ? (
+                  <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                    ● Backend Connected
+                  </span>
+                ) : (
+                  <span className="text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                    ○ Backend Offline
+                  </span>
+                )}
               </span>
             </div>
 
@@ -414,11 +429,11 @@ export const LoginPage = () => {
           </div>
         </div>
 
-        {/* Prototype Disclaimer Notice */}
+        {/* System Notice */}
         <div className="flex items-start gap-2.5 p-3.5 rounded-2xl bg-[#0f392b]/5 border border-[#0f392b]/10 text-gray-600">
           <Info className="w-4 h-4 text-[#84cc16] shrink-0 mt-0.5" />
           <p className="text-[11px] leading-relaxed">
-            <strong className="text-[#0f392b]">Prototype Notice:</strong> MongoDB Atlas live authentication is active when the backend is running. In offline mode, password validation and role switching are fully simulated for instant hackathon evaluation.
+            <strong className="text-[#0f392b]">System Notice:</strong> Authentication and authorization are enforced by the Node.js Express backend and MongoDB database. For evaluators, accounts with passwords can be submitted via the form above or registered on the Registration page.
           </p>
         </div>
 

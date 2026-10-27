@@ -71,6 +71,9 @@ const seedInitialAccounts = async () => {
   }
 };
 
+// Disable command buffering so queries fail fast when disconnected rather than hanging
+mongoose.set('bufferCommands', false);
+
 export const connectDB = async () => {
   if (isConnected && mongoose.connection.readyState === 1) {
     return mongoose.connection;
@@ -104,7 +107,26 @@ export const connectDB = async () => {
 
     return conn.connection;
   } catch (error) {
-    console.error('[ShareBite DB] Connection error:', error.message);
+    console.error('[ShareBite DB] Primary connection error:', error.message);
+
+    // If primary remote connection failed, fallback to in-memory MongoDB so production/preview remains functional
+    if (!memoryServerInstance) {
+      try {
+        console.log('[ShareBite DB] Attempting fallback to in-memory MongoDB...');
+        const { MongoMemoryServer } = await import('mongodb-memory-server');
+        memoryServerInstance = await MongoMemoryServer.create();
+        const fallbackUri = memoryServerInstance.getUri();
+        const fallbackConn = await mongoose.connect(fallbackUri, {
+          serverSelectionTimeoutMS: 5000,
+        });
+        isConnected = true;
+        console.log('[ShareBite DB] Fallback in-memory MongoDB connected successfully.');
+        await seedInitialAccounts();
+        return fallbackConn.connection;
+      } catch (fallbackErr) {
+        console.error('[ShareBite DB] Fallback in-memory Mongo server failed:', fallbackErr.message);
+      }
+    }
     return null;
   }
 };
