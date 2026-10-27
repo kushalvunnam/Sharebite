@@ -31,11 +31,15 @@ export const RecipientDashboard = () => {
 
   // Claimed items
   const myClaimedDonations = donations.filter(d => 
-    d.status === 'claimed' && (d.claimedBy?.includes("Eastside") || !d.claimedBy || d.claimedBy.includes(currentUser?.organization))
+    d.status === 'claimed' && (d.claimedBy?.includes(currentUser?.organization) || d.claimedBy?.includes("Eastside") || !d.claimedBy)
   );
 
   const availableNearby = donations.filter(d => d.status === 'available');
-  const pastReceived = donations.filter(d => d.status === 'completed');
+  const pastReceived = donations.filter(d => d.status === 'completed' && (d.claimedBy?.includes(currentUser?.organization) || d.claimedBy?.includes("Eastside")));
+
+  const totalDistributed = pastReceived.reduce((sum, d) => sum + (d.servings || 0), 0);
+  const familiesSupported = Math.round(totalDistributed / 3);
+  const budgetSaved = Math.round(totalDistributed * 3.8);
 
   return (
     <div className="min-h-screen py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
@@ -55,12 +59,16 @@ export const RecipientDashboard = () => {
               <h1 className="text-2xl font-bold text-[#0f392b] font-['Outfit']">
                 {currentUser?.organization || "Eastside Hope Food Rescue & Shelter"}
               </h1>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-[#f97316]/20 text-[#f97316] border border-[#f97316]/30">
-                VERIFIED 501(c)(3) CHARITY
+              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${
+                currentUser?.verified 
+                  ? "bg-[#f97316]/20 text-[#f97316] border-[#f97316]/30"
+                  : "bg-gray-100 text-gray-600 border-gray-200"
+              }`}>
+                {currentUser?.verified ? "VERIFIED 501(c)(3) CHARITY" : "NOT VERIFIED"}
               </span>
             </div>
             <p className="text-xs text-gray-500 mt-0.5">
-              Director: <strong className="text-gray-800">{currentUser?.name}</strong> • Tax ID: {currentUser?.taxId || "EIN-82-4910291"} • Cold-Chain Certified
+              Director: <strong className="text-gray-800">{currentUser?.name}</strong> • Tax ID: {currentUser?.taxId || "Not verified"} • Cold-Chain Certified
             </p>
           </div>
         </div>
@@ -84,10 +92,10 @@ export const RecipientDashboard = () => {
             </div>
           </div>
           <div className="text-3xl font-black text-[#0f392b] font-['Outfit'] mt-2">
-            12,450+
+            {totalDistributed.toLocaleString()}
           </div>
           <div className="text-[11px] text-gray-500 mt-1">
-            Nutritious surplus served hot
+            {totalDistributed > 0 ? "Nutritious surplus served hot" : "No meals distributed yet"}
           </div>
         </TiltCard>
 
@@ -99,10 +107,10 @@ export const RecipientDashboard = () => {
             </div>
           </div>
           <div className="text-3xl font-black text-amber-800 font-['Outfit'] mt-2">
-            3,120+
+            {familiesSupported.toLocaleString()}
           </div>
           <div className="text-[11px] text-gray-500 mt-1">
-            Across 4 community centers
+            {familiesSupported > 0 ? "Across local community centers" : "No families served yet"}
           </div>
         </TiltCard>
 
@@ -114,10 +122,10 @@ export const RecipientDashboard = () => {
             </div>
           </div>
           <div className="text-3xl font-black text-emerald-800 font-['Outfit'] mt-2">
-            $47,300
+            ${budgetSaved.toLocaleString()}
           </div>
           <div className="text-[11px] text-gray-500 mt-1">
-            Reallocated to emergency shelter beds
+            {budgetSaved > 0 ? "Reallocated to emergency shelter beds" : "No budget savings recorded"}
           </div>
         </TiltCard>
 
@@ -254,41 +262,51 @@ export const RecipientDashboard = () => {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {availableNearby.slice(0, 3).map((item) => (
-            <div
-              key={item.id}
-              className="bg-white rounded-3xl p-5 border border-gray-200 shadow-sm flex flex-col justify-between"
-            >
-              <div>
-                <img
-                  src={item.imageUrl}
-                  alt={item.title}
-                  className="w-full h-36 rounded-2xl object-cover mb-3"
-                />
-                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#84cc16]/20 text-[#0f392b]">
-                  {item.category}
-                </span>
-                <h4 className="font-bold text-base text-gray-900 mt-1 font-['Outfit'] line-clamp-1">
-                  {item.title}
-                </h4>
-                <div className="text-xs text-gray-500 mt-0.5">
-                  {item.donorName} • {item.distance}
-                </div>
-                <div className="mt-2 text-xs font-bold text-[#0f392b]">
-                  {item.servings} Servings Available
-                </div>
-              </div>
-
-              <button
-                onClick={() => setSelectedDonation(item)}
-                className="mt-4 w-full py-2.5 rounded-xl bg-[#0f392b] hover:bg-[#164e3b] text-white text-xs font-bold transition-all"
+        {availableNearby.length === 0 ? (
+          <div className="bg-white rounded-3xl p-8 border border-gray-200 text-center">
+            <Utensils className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+            <h4 className="font-bold text-gray-700">No active food listings</h4>
+            <p className="text-xs text-gray-500 mt-1">
+              There are currently no surplus food batches available nearby. Check back soon or alert local food donors.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {availableNearby.slice(0, 3).map((item) => (
+              <div
+                key={item.id}
+                className="bg-white rounded-3xl p-5 border border-gray-200 shadow-sm flex flex-col justify-between"
               >
-                Claim This Surplus
-              </button>
-            </div>
-          ))}
-        </div>
+                <div>
+                  <img
+                    src={item.imageUrl}
+                    alt={item.title}
+                    className="w-full h-36 rounded-2xl object-cover mb-3"
+                  />
+                  <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#84cc16]/20 text-[#0f392b]">
+                    {item.category}
+                  </span>
+                  <h4 className="font-bold text-base text-gray-900 mt-1 font-['Outfit'] line-clamp-1">
+                    {item.title}
+                  </h4>
+                  <div className="text-xs text-gray-500 mt-0.5">
+                    {item.donorName} • {item.distance}
+                  </div>
+                  <div className="mt-2 text-xs font-bold text-[#0f392b]">
+                    {item.servings} Servings Available
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setSelectedDonation(item)}
+                  className="mt-4 w-full py-2.5 rounded-xl bg-[#0f392b] hover:bg-[#164e3b] text-white text-xs font-bold transition-all"
+                >
+                  Claim This Surplus
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
     </div>

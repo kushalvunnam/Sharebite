@@ -20,8 +20,8 @@ export const DEMO_USERS = {
     orgType: "Restaurant & Trattoria",
     address: "412 Mulberry St, Downtown",
     avatar: "https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&w=300&q=80",
-    verified: true,
-    safetyLicense: "FSSAI / FDA-NYC #8841-A",
+    verified: false,
+    safetyLicense: "Not verified",
   },
   recipient: {
     id: "recip-1",
@@ -32,8 +32,8 @@ export const DEMO_USERS = {
     orgType: "Emergency Shelter & Soup Kitchen",
     address: "320 Oak Ridge Rd, East District",
     avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80",
-    verified: true,
-    taxId: "EIN-82-4910291 (501c3)",
+    verified: false,
+    taxId: "Not verified",
   },
   admin: {
     id: "admin-1",
@@ -44,7 +44,7 @@ export const DEMO_USERS = {
     orgType: "Platform Oversight",
     address: "ShareBite HQ, Innovation Way",
     avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
-    verified: true,
+    verified: false,
   }
 };
 
@@ -58,7 +58,14 @@ export const AppProvider = ({ children }) => {
   const [donations, setDonations] = useState(() => {
     try {
       const saved = localStorage.getItem('sharebite_donations');
-      return saved ? JSON.parse(saved) : INITIAL_DONATIONS;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const sanitized = Array.isArray(parsed)
+          ? parsed.filter(d => !['DON-101', 'DON-102', 'DON-103', 'DON-104', 'DON-105', 'DON-106'].includes(d.id))
+          : [];
+        return sanitized;
+      }
+      return INITIAL_DONATIONS;
     } catch {
       return INITIAL_DONATIONS;
     }
@@ -78,7 +85,14 @@ export const AppProvider = ({ children }) => {
   const [notifications, setNotifications] = useState(() => {
     try {
       const savedNotifs = localStorage.getItem('sharebite_notifs');
-      return savedNotifs ? JSON.parse(savedNotifs) : INITIAL_NOTIFICATIONS;
+      if (savedNotifs) {
+        const parsed = JSON.parse(savedNotifs);
+        const sanitized = Array.isArray(parsed)
+          ? parsed.filter(n => !['notif-1', 'notif-2', 'notif-3', 'notif-4'].includes(n.id) && !n.id?.startsWith('notif-demo-'))
+          : [];
+        return sanitized;
+      }
+      return INITIAL_NOTIFICATIONS;
     } catch {
       return INITIAL_NOTIFICATIONS;
     }
@@ -461,22 +475,22 @@ export const AppProvider = ({ children }) => {
     showToast('Reservation cancelled. The food is now available for other NGOs.', 'info');
   };
 
-  // Reset demo data
+  // Reset application data to zero / empty
   const resetDemoData = () => {
-    setDonations(INITIAL_DONATIONS);
-    setNotifications(INITIAL_NOTIFICATIONS);
+    setDonations([]);
+    setNotifications([]);
     setCurrentUser(DEMO_USERS.donor);
     localStorage.removeItem('sharebite_donations');
     localStorage.removeItem('sharebite_user');
     localStorage.removeItem('sharebite_notifs');
     localStorage.removeItem('sharebite_token');
-    showToast('Demo data restored to initial state', 'info');
+    showToast('All application data reset to empty state', 'info');
   };
 
-  // Compute live metrics
+  // Compute live metrics (starts strictly at 0)
   const totalMealsSaved = donations
     .filter(d => d.status === 'completed' || d.status === 'claimed')
-    .reduce((acc, curr) => acc + (curr.servings || 0), IMPACT_METRICS.totalMealsRescued);
+    .reduce((acc, curr) => acc + (curr.servings || 0), 0);
 
   const availableListingsCount = donations.filter(d => d.status === 'available').length;
 

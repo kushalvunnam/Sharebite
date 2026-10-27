@@ -31,16 +31,16 @@ export const DonorDashboard = () => {
   const [enteredOtp, setEnteredOtp] = useState('');
   const [downloadSuccess, setDownloadSuccess] = useState(false);
 
-  // Filter donor's listings (or fallback to demo items)
+  // Filter donor's listings
   const donorListings = donations.filter(d => 
-    d.donorId === currentUser?.id || d.donorName.includes("Verde") || d.donorName.includes("Golden Harvest")
+    d.donorId === currentUser?.id || (currentUser?.organization && d.donorName === currentUser.organization)
   );
 
   const activeClaimed = donorListings.filter(d => d.status === 'claimed');
   const availableListings = donorListings.filter(d => d.status === 'available');
   const completedListings = donorListings.filter(d => d.status === 'completed');
 
-  const totalPortionsDonated = donorListings.reduce((sum, d) => sum + (d.servings || 0), 1420);
+  const totalPortionsDonated = donorListings.reduce((sum, d) => sum + (d.servings || 0), 0);
   const totalTaxSavedUsd = Math.round(totalPortionsDonated * 3.8);
 
   const handleVerifyOtp = (e) => {
@@ -86,12 +86,16 @@ export const DonorDashboard = () => {
               <h1 className="text-2xl font-bold text-[#0f392b] font-['Outfit']">
                 {currentUser?.organization || "Verde Artisan Osteria"}
               </h1>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-[#84cc16]/20 text-[#0f392b] border border-[#84cc16]/30">
-                VERIFIED DONOR KITCHEN
+              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${
+                currentUser?.verified
+                  ? "bg-[#84cc16]/20 text-[#0f392b] border-[#84cc16]/30"
+                  : "bg-gray-100 text-gray-600 border-gray-200"
+              }`}>
+                {currentUser?.verified ? "VERIFIED DONOR KITCHEN" : "NOT VERIFIED"}
               </span>
             </div>
             <p className="text-xs text-gray-500 mt-0.5">
-              Managed by <strong className="text-gray-800">{currentUser?.name}</strong> • Food Safety License: {currentUser?.safetyLicense || "FSSAI / FDA #8841-A"}
+              Managed by <strong className="text-gray-800">{currentUser?.name}</strong> • Food Safety License: {currentUser?.safetyLicense || "Not verified"}
             </p>
           </div>
         </div>
@@ -133,7 +137,7 @@ export const DonorDashboard = () => {
             ${totalTaxSavedUsd.toLocaleString()}
           </div>
           <div className="text-[11px] text-gray-500 mt-1">
-            IRS Sec. 170(e)(3) deduction
+            {totalPortionsDonated > 0 ? "IRS Sec. 170(e)(3) deduction" : "No tax deductions recorded"}
           </div>
         </TiltCard>
 
@@ -144,11 +148,11 @@ export const DonorDashboard = () => {
               <ShieldCheck className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-3xl font-black text-[#0f392b] font-['Outfit'] mt-2">
-            4.95 / 5.0
+          <div className="text-2xl font-black text-[#0f392b] font-['Outfit'] mt-2">
+            {donorListings.length > 0 ? "4.95 / 5.0" : "Not yet rated"}
           </div>
-          <div className="text-[11px] text-[#84cc16] font-bold mt-1">
-            100% HACCP temperature compliance
+          <div className="text-[11px] text-gray-500 font-medium mt-1">
+            {donorListings.length > 0 ? "100% HACCP temperature compliance" : "No safety audits logged yet"}
           </div>
         </TiltCard>
 
@@ -257,51 +261,61 @@ export const DonorDashboard = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {donorListings.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50/70 transition-colors">
-                  <td className="p-4 font-bold text-gray-900 flex items-center gap-3">
-                    <img
-                      src={item.imageUrl}
-                      alt={item.title}
-                      className="w-10 h-10 rounded-xl object-cover shrink-0"
-                    />
-                    <div>
-                      <div className="line-clamp-1">{item.title}</div>
-                      <div className="text-[10px] text-gray-400 font-normal">
-                        Logged: {item.createdAt?.split('T')[0] || 'Today'}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-4 font-bold text-[#0f392b]">
-                    {item.servings} meals ({item.weightKg} kg)
-                  </td>
-                  <td className="p-4 text-gray-600 font-medium">
-                    {item.storageType}
-                  </td>
-                  <td className="p-4">
-                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase ${
-                      item.status === 'available'
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : item.status === 'claimed'
-                        ? 'bg-amber-100 text-amber-800 animate-pulse'
-                        : 'bg-gray-100 text-gray-700'
-                    }`}>
-                      {item.status}
-                    </span>
-                  </td>
-                  <td className="p-4 text-gray-700 font-semibold">
-                    {item.claimedBy || "—"}
-                  </td>
-                  <td className="p-4 text-right">
-                    <button
-                      onClick={() => setSelectedDonation(item)}
-                      className="text-[#0f392b] font-bold hover:underline"
-                    >
-                      View Details
-                    </button>
+              {donorListings.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="p-10 text-center text-gray-500">
+                    <Utensils className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                    <div className="font-bold text-sm text-gray-700">No donations yet</div>
+                    <div className="text-xs text-gray-400 mt-1">You haven't listed any surplus food batches yet. Post your first surplus batch above!</div>
                   </td>
                 </tr>
-              ))}
+              ) : (
+                donorListings.map((item) => (
+                  <tr key={item.id} className="hover:bg-gray-50/70 transition-colors">
+                    <td className="p-4 font-bold text-gray-900 flex items-center gap-3">
+                      <img
+                        src={item.imageUrl}
+                        alt={item.title}
+                        className="w-10 h-10 rounded-xl object-cover shrink-0"
+                      />
+                      <div>
+                        <div className="line-clamp-1">{item.title}</div>
+                        <div className="text-[10px] text-gray-400 font-normal">
+                          Logged: {item.createdAt?.split('T')[0] || 'Today'}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="p-4 font-bold text-[#0f392b]">
+                      {item.servings} meals ({item.weightKg} kg)
+                    </td>
+                    <td className="p-4 text-gray-600 font-medium">
+                      {item.storageType}
+                    </td>
+                    <td className="p-4">
+                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase ${
+                        item.status === 'available'
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : item.status === 'claimed'
+                          ? 'bg-amber-100 text-amber-800 animate-pulse'
+                          : 'bg-gray-100 text-gray-700'
+                      }`}>
+                        {item.status}
+                      </span>
+                    </td>
+                    <td className="p-4 text-gray-700 font-semibold">
+                      {item.claimedBy || "—"}
+                    </td>
+                    <td className="p-4 text-right">
+                      <button
+                        onClick={() => setSelectedDonation(item)}
+                        className="text-[#0f392b] font-bold hover:underline"
+                      >
+                        View Details
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

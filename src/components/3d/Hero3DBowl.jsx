@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, ShieldCheck, Clock, Heart, Leaf, Utensils } from 'lucide-react';
+import { useApp } from '../../context/AppContext';
 
 export const Hero3DBowl = () => {
+  const { totalMealsSaved, availableListingsCount } = useApp();
   const containerRef = useRef(null);
   const [rotate, setRotate] = useState({ x: 8, y: -10 });
   const [isHovered, setIsHovered] = useState(false);
@@ -208,7 +210,7 @@ export const Hero3DBowl = () => {
               Zero Waste Today
             </div>
             <div className="text-[11px] text-[#0f392b]/70 font-medium">
-              48,250+ Meals Rescued
+              {totalMealsSaved > 0 ? `${totalMealsSaved.toLocaleString()}+ Meals Rescued` : '0 Meals Rescued'}
             </div>
           </div>
         </motion.div>
@@ -238,7 +240,7 @@ export const Hero3DBowl = () => {
               HACCP & FDA Compliant
             </div>
             <div className="text-[11px] text-[#84cc16] font-medium flex items-center gap-1">
-              <Clock className="w-3 h-3" /> Average pickup: 28 mins
+              <Clock className="w-3 h-3" /> {totalMealsSaved > 0 ? 'Average pickup: 28 mins' : 'Ready for pickup handoffs'}
             </div>
           </div>
         </motion.div>
@@ -259,7 +261,7 @@ export const Hero3DBowl = () => {
           }}
         >
           <span className="w-2.5 h-2.5 rounded-full bg-[#84cc16] animate-ping" />
-          <span>Live Match: 18 Donors active</span>
+          <span>{availableListingsCount > 0 ? `Live Match: ${availableListingsCount} Surplus Active` : 'Redistribution Network Ready'}</span>
         </motion.div>
       </div>
     </div>

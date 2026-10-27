@@ -5,15 +5,19 @@ import { TiltCard } from '../3d/TiltCard';
 import { useApp } from '../../context/AppContext';
 
 export const ImpactStats = () => {
-  const { totalMealsSaved } = useApp();
+  const { totalMealsSaved, donations } = useApp();
+
+  const co2Tons = ((totalMealsSaved * 0.45 * 2.5) / 1000).toFixed(1);
+  const donorCount = new Set(donations.map(d => d.donorId).filter(Boolean)).size;
+  const recipientCount = new Set(donations.filter(d => d.claimedBy).map(d => d.claimedBy)).size;
 
   const stats = [
     {
       id: "meals",
       icon: Utensils,
-      value: `${totalMealsSaved.toLocaleString()}+`,
+      value: totalMealsSaved > 0 ? `${totalMealsSaved.toLocaleString()}` : "0",
       label: "Meals Rescued & Served",
-      detail: "Wholesome, nutritious surplus diverted from landfills",
+      detail: totalMealsSaved > 0 ? "Wholesome, nutritious surplus diverted from landfills" : "No meals rescued yet. Waiting for initial donation listings.",
       color: "#84cc16",
       bgLight: "bg-[#84cc16]/10",
       accent: "text-[#84cc16]"
@@ -21,9 +25,9 @@ export const ImpactStats = () => {
     {
       id: "co2",
       icon: CloudRain,
-      value: "115.8 Tons",
+      value: `${co2Tons} Tons`,
       label: "CO2 Emissions Prevented",
-      detail: "Equivalent to removing 28 gas cars off the road for a year",
+      detail: totalMealsSaved > 0 ? "Equivalent to removing gas cars off the road" : "Zero greenhouse emissions diverted so far.",
       color: "#267c61",
       bgLight: "bg-[#267c61]/10",
       accent: "text-[#267c61]"
@@ -31,7 +35,7 @@ export const ImpactStats = () => {
     {
       id: "donors",
       icon: Store,
-      value: "324+",
+      value: `${donorCount}`,
       label: "Verified Donor Kitchens",
       detail: "Bakeries, trattorias, caterers, & supermarket partners",
       color: "#0f392b",
@@ -41,7 +45,7 @@ export const ImpactStats = () => {
     {
       id: "ngos",
       icon: HeartHandshake,
-      value: "146+",
+      value: `${recipientCount}`,
       label: "Partner NGOs & Shelters",
       detail: "Vetted 501(c)(3) charities & community food banks",
       color: "#f97316",
@@ -82,7 +86,7 @@ export const ImpactStats = () => {
                       <Icon className={`w-6 h-6 ${stat.accent}`} />
                     </div>
                     <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 bg-gray-50 px-2 py-1 rounded-md">
-                      Verified
+                      {totalMealsSaved > 0 ? "Verified" : "No data"}
                     </span>
                   </div>
 
@@ -108,12 +112,16 @@ export const ImpactStats = () => {
           <div className="flex items-center gap-3">
             <span className="w-2.5 h-2.5 rounded-full bg-[#84cc16] animate-ping" />
             <span className="text-xs font-semibold text-white/90">
-              <strong className="text-[#84cc16]">Live Ticker:</strong> Verde Artisan Trattoria handed off 45 portions to Eastside Shelter • 14 mins ago
+              <strong className="text-[#84cc16]">Live Ticker:</strong>{" "}
+              {totalMealsSaved > 0 
+                ? "Recent food handoffs completed • Active community redistribution"
+                : "No handoff activity recorded yet. Surplus rescues will display here in real time."}
             </span>
           </div>
 
           <div className="text-xs font-bold text-[#84cc16] flex items-center gap-1.5 shrink-0">
-            <TrendingUp className="w-4 h-4" /> Platform Average Handoff: 28 mins
+            <TrendingUp className="w-4 h-4" />{" "}
+            {totalMealsSaved > 0 ? "Platform Average Handoff: 28 mins" : "Platform Ready for Handoffs"}
           </div>
         </div>
       </div>

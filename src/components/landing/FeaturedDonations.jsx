@@ -62,16 +62,42 @@ export const FeaturedDonations = () => {
           })}
         </div>
 
-        {/* Food Listings Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          {availableDonations.slice(0, 6).map((donation) => (
-            <DonationCard
-              key={donation.id}
-              donation={donation}
-              onSelect={setSelectedDonation}
-            />
-          ))}
-        </div>
+        {/* Food Listings Grid or Clean Empty State */}
+        {availableDonations.length === 0 ? (
+          <div className="bg-white rounded-3xl border border-gray-200/80 p-10 sm:p-14 text-center max-w-lg mx-auto shadow-sm">
+            <div className="w-14 h-14 rounded-2xl bg-[#84cc16]/15 text-[#0f392b] flex items-center justify-center mx-auto mb-4">
+              <Sparkles className="w-7 h-7 text-[#84cc16]" />
+            </div>
+            <h3 className="text-xl font-bold text-[#0f392b] font-['Outfit']">No donations yet</h3>
+            <p className="text-xs sm:text-sm text-gray-500 mt-2 leading-relaxed">
+              There are currently no active surplus food listings in this category. Be the first to donate surplus meals or check back shortly!
+            </p>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+              <Link
+                to="/donor-dashboard"
+                className="px-5 py-2.5 rounded-xl bg-[#0f392b] hover:bg-[#164e3b] text-white text-xs font-bold transition-all shadow-md"
+              >
+                List First Donation
+              </Link>
+              <Link
+                to="/explore"
+                className="px-5 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                View Catalog
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {availableDonations.slice(0, 6).map((donation) => (
+              <DonationCard
+                key={donation.id}
+                donation={donation}
+                onSelect={setSelectedDonation}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Bottom Banner CTA */}
         <div className="mt-12 text-center">

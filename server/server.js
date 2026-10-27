@@ -8,50 +8,7 @@ app.use(cors());
 app.use(express.json());
 
 // In-memory demo store (connectable to MongoDB Atlas via MONGO_URI)
-let donations = [
-  {
-    id: "DON-101",
-    title: "Fresh Mediterranean Herb Focaccia & Sourdough",
-    category: "Bakery",
-    donorName: "Golden Harvest Boulangerie",
-    servings: 65,
-    weightKg: 24,
-    status: "available",
-    urgency: "urgent",
-    timeRemainingMins: 45,
-    pickupWindow: "Today, 5:30 PM - 7:00 PM",
-    storageType: "Ambient Room Temp",
-    packaging: "Sanitized crates, tamper proof sealed",
-    allergens: ["Gluten"],
-    dietaryTags: ["Vegetarian", "Vegan"],
-    distance: "1.4 km away",
-    address: "88 Pinecrest Ave, Westside",
-    verificationCode: "SB-4892",
-    otpCode: "749210",
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: "DON-102",
-    title: "Roasted Vegetable & Ricotta Penne al Forno",
-    category: "Prepared Meals",
-    donorName: "Verde Artisan Osteria",
-    servings: 45,
-    weightKg: 18,
-    status: "available",
-    urgency: "urgent",
-    timeRemainingMins: 75,
-    pickupWindow: "Today, 6:00 PM - 7:30 PM",
-    storageType: "Hot Holding (> 140°F)",
-    packaging: "Commercial steam pans",
-    allergens: ["Dairy", "Gluten"],
-    dietaryTags: ["Vegetarian"],
-    distance: "1.2 km away",
-    address: "412 Mulberry St, Downtown",
-    verificationCode: "SB-3190",
-    otpCode: "219844",
-    createdAt: new Date().toISOString()
-  }
-];
+let donations = [];
 
 // Health check
 app.get('/api/health', (req, res) => {

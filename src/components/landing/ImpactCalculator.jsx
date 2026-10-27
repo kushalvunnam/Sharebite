@@ -13,7 +13,7 @@ import {
 import { TiltCard } from '../3d/TiltCard';
 
 export const ImpactCalculator = () => {
-  const [weeklyMeals, setWeeklyMeals] = useState(150);
+  const [weeklyMeals, setWeeklyMeals] = useState(0);
 
   // Environmental and financial formulas:
   // Average meal waste = ~0.45 kg
@@ -73,12 +73,12 @@ export const ImpactCalculator = () => {
             {/* Slider Range */}
             <div>
               <div className="flex justify-between text-xs font-bold text-gray-600 mb-2">
-                <span>20 meals (Small cafe)</span>
+                <span>0 meals (New kitchen)</span>
                 <span>1,000+ (Hotel / Caterer)</span>
               </div>
               <input
                 type="range"
-                min="20"
+                min="0"
                 max="1000"
                 step="10"
                 value={weeklyMeals}

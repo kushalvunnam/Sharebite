@@ -241,16 +241,22 @@ export const ExploreDonationsPage = () => {
           {filteredDonations.length === 0 ? (
             <div className="bg-white rounded-3xl border border-gray-200 p-12 text-center max-w-md mx-auto my-12">
               <Utensils className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <h3 className="text-lg font-bold text-gray-800">No surplus matched your criteria</h3>
-              <p className="text-xs text-gray-500 mt-1 mb-4">
-                Try loosening your filters or clearing search terms to explore available pickups.
+              <h3 className="text-lg font-bold text-gray-800">
+                {donations.length === 0 ? "No donations yet" : "No surplus matched your criteria"}
+              </h3>
+              <p className="text-xs text-gray-500 mt-1 mb-4 leading-relaxed">
+                {donations.length === 0
+                  ? "There are currently no food surplus listings available in the network. Be the first to list surplus food!"
+                  : "Try loosening your filters or clearing search terms to explore available pickups."}
               </p>
-              <button
-                onClick={resetAllFilters}
-                className="px-4 py-2 rounded-xl bg-[#0f392b] text-white text-xs font-bold"
-              >
-                Reset All Filters
-              </button>
+              {donations.length > 0 && (
+                <button
+                  onClick={resetAllFilters}
+                  className="px-4 py-2 rounded-xl bg-[#0f392b] text-white text-xs font-bold"
+                >
+                  Reset All Filters
+                </button>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">

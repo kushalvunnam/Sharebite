@@ -1,81 +1,25 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Building2, Utensils, HeartHandshake, ShieldCheck, Zap, Navigation, ArrowUpRight } from 'lucide-react';
+import { useApp } from '../../context/AppContext';
 
 export const CommunityGlobeNetwork = () => {
+  const { donations } = useApp();
   const [activeNode, setActiveNode] = useState(null);
 
-  const nodes = [
-    {
-      id: "node-1",
-      name: "Verde Artisan Osteria",
-      type: "Donor (Restaurant)",
-      x: 28,
-      y: 35,
-      meals: "1,420 meals saved",
-      status: "Active listing available",
-      color: "#84cc16"
-    },
-    {
-      id: "node-2",
-      name: "Golden Harvest Bakery",
-      type: "Donor (Bakery)",
-      x: 72,
-      y: 28,
-      meals: "3,210 meals saved",
-      status: "Pickup in progress",
-      color: "#84cc16"
-    },
-    {
-      id: "node-3",
-      name: "Terra Organics Grocer",
-      type: "Donor (Supermarket)",
-      x: 18,
-      y: 68,
-      meals: "5,640 meals saved",
-      status: "Daily surplus logged",
-      color: "#84cc16"
-    },
-    {
-      id: "node-4",
-      name: "Eastside Hope Food Rescue",
-      type: "Recipient NGO",
-      x: 52,
-      y: 52,
-      meals: "12,450 meals distributed",
-      status: "Verified 501(c)(3) Hub",
-      color: "#f97316"
-    },
-    {
-      id: "node-5",
-      name: "Community Breadbasket Hub",
-      type: "Recipient Shelter",
-      x: 82,
-      y: 74,
-      meals: "8,900 meals distributed",
-      status: "Cold-chain equipped",
-      color: "#f97316"
-    },
-    {
-      id: "node-6",
-      name: "Metropolis Caterers",
-      type: "Donor (Caterer)",
-      x: 64,
-      y: 84,
-      meals: "4,890 meals saved",
-      status: "Event surplus ready",
-      color: "#84cc16"
-    }
-  ];
+  // Derive network nodes dynamically from actual donations
+  const nodes = donations.map((d, idx) => ({
+    id: d.id || `node-${idx}`,
+    name: d.donorName || "Food Donor",
+    type: `Donor (${d.category || 'Kitchen'})`,
+    x: 20 + ((idx * 27) % 60),
+    y: 25 + ((idx * 33) % 55),
+    meals: `${d.servings || 0} meals logged`,
+    status: d.status === 'claimed' ? 'Pickup in progress' : d.status === 'completed' ? 'Handoff completed' : 'Surplus available',
+    color: "#84cc16"
+  }));
 
-  const connections = [
-    { from: nodes[0], to: nodes[3] },
-    { from: nodes[1], to: nodes[3] },
-    { from: nodes[1], to: nodes[4] },
-    { from: nodes[2], to: nodes[3] },
-    { from: nodes[5], to: nodes[4] },
-    { from: nodes[0], to: nodes[1] },
-  ];
+  const connections = [];
 
   return (
     <div className="relative w-full rounded-3xl bg-gradient-to-br from-[#0a231b] via-[#0f392b] to-[#164e3b] text-white p-6 sm:p-10 overflow-hidden shadow-2xl border border-[#84cc16]/20">
@@ -218,6 +162,17 @@ export const CommunityGlobeNetwork = () => {
           );
         })}
 
+        {/* Empty state overlay when no nodes */}
+        {nodes.length === 0 && (
+          <div className="relative z-10 text-center max-w-sm px-6 py-6 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 mx-4">
+            <Navigation className="w-8 h-8 text-[#84cc16] mx-auto mb-2 opacity-80" />
+            <h4 className="font-bold text-sm text-white font-['Outfit']">Redistribution Grid Standby</h4>
+            <p className="text-xs text-white/60 mt-1 leading-relaxed">
+              No active community network nodes yet. When donors list surplus food and NGOs connect, real-time rescue routes will illuminate here.
+            </p>
+          </div>
+        )}
+
         {/* Selected Node Details Floating Overlay */}
         {activeNode && (
           <motion.div
@@ -256,11 +211,15 @@ export const CommunityGlobeNetwork = () => {
       {/* Network Bottom Stats Banner */}
       <div className="mt-6 pt-6 border-t border-white/10 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
         <div>
-          <div className="text-xl sm:text-2xl font-bold text-[#84cc16] font-['Outfit']">2.4 mins</div>
+          <div className="text-xl sm:text-2xl font-bold text-[#84cc16] font-['Outfit']">
+            {nodes.length > 0 ? "2.4 mins" : "0 mins"}
+          </div>
           <div className="text-xs text-white/60">Average Claim Match Time</div>
         </div>
         <div>
-          <div className="text-xl sm:text-2xl font-bold text-white font-['Outfit']">98.9%</div>
+          <div className="text-xl sm:text-2xl font-bold text-white font-['Outfit']">
+            {nodes.length > 0 ? "98.9%" : "0%"}
+          </div>
           <div className="text-xs text-white/60">Safe Handoff Success</div>
         </div>
         <div>
@@ -268,7 +227,9 @@ export const CommunityGlobeNetwork = () => {
           <div className="text-xs text-white/60">Zero Platform Cut</div>
         </div>
         <div>
-          <div className="text-xl sm:text-2xl font-bold text-white font-['Outfit']">3.2 km</div>
+          <div className="text-xl sm:text-2xl font-bold text-white font-['Outfit']">
+            {nodes.length > 0 ? "3.2 km" : "0 km"}
+          </div>
           <div className="text-xs text-white/60">Avg. Local Pickup Radius</div>
         </div>
       </div>

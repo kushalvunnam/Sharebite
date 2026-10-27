@@ -72,8 +72,10 @@ export const ImpactPage = () => {
         </div>
 
         <div className="flex flex-wrap items-center justify-between text-xs text-white/70 pt-1">
-          <span>Current Run-Rate: ~1,200 meals rescued weekly</span>
-          <span className="text-[#84cc16] font-semibold">On track to meet goal 2 months ahead of schedule</span>
+          <span>Current Run-Rate: {totalMealsSaved > 0 ? `~${Math.round(totalMealsSaved / 4)} meals rescued weekly` : "0 meals rescued"}</span>
+          <span className="text-[#84cc16] font-semibold">
+            {totalMealsSaved > 0 ? "On track toward community sustainability milestone" : "Ready to record live community surplus handoffs"}
+          </span>
         </div>
       </div>
 
@@ -92,7 +94,7 @@ export const ImpactPage = () => {
             </div>
           </div>
           <p className="text-xs text-gray-500 mt-3 border-t border-gray-100 pt-3">
-            Equivalent to preventing 28 gas cars driving for an entire year.
+            {totalMealsSaved > 0 ? "Equivalent to preventing gas cars driving for a year." : "0.0 MT CO2e emissions diverted so far."}
           </p>
         </TiltCard>
 
@@ -109,7 +111,7 @@ export const ImpactPage = () => {
             </div>
           </div>
           <p className="text-xs text-gray-500 mt-3 border-t border-gray-100 pt-3">
-            Enough clean drinking water to supply 3,200 households for a month.
+            {totalMealsSaved > 0 ? "Clean agricultural water conserved for communities." : "0.00M Litres clean water conserved so far."}
           </p>
         </TiltCard>
 
@@ -126,7 +128,7 @@ export const ImpactPage = () => {
             </div>
           </div>
           <p className="text-xs text-gray-500 mt-3 border-t border-gray-100 pt-3">
-            Equivalent carbon sequestered by a 40-acre mature temperate forest.
+            {totalMealsSaved > 0 ? "Equivalent carbon sequestered by urban forest." : "0 trees equivalence calculated."}
           </p>
         </TiltCard>
 
@@ -143,7 +145,7 @@ export const ImpactPage = () => {
             </div>
           </div>
           <p className="text-xs text-gray-500 mt-3 border-t border-gray-100 pt-3">
-            IRS Sec. 170(e)(3) certified deduction receipts generated.
+            {totalMealsSaved > 0 ? "IRS Sec. 170(e)(3) certified deduction receipts generated." : "$0 tax deduction claims recorded so far."}
           </p>
         </TiltCard>
       </div>

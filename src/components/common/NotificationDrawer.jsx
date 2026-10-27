@@ -59,7 +59,7 @@ export const NotificationDrawer = () => {
             {notifications.length === 0 ? (
               <div className="h-64 flex flex-col items-center justify-center text-center p-6 text-gray-400">
                 <Bell className="w-12 h-12 mb-3 stroke-1 text-gray-300" />
-                <p className="font-semibold text-gray-600">All caught up!</p>
+                <p className="font-semibold text-gray-600">No notifications</p>
                 <p className="text-xs text-gray-400 mt-1">No pending notifications at this moment.</p>
               </div>
             ) : (
