@@ -16,6 +16,7 @@ import ImpactPage from './pages/ImpactPage';
 import SafetyGuidelinesPage from './pages/SafetyGuidelinesPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import SettingsPage from './pages/SettingsPage';
 
 // Scroll to top component on route changes
 const ScrollToTop = () => {
@@ -115,6 +116,16 @@ const MainLayout = () => {
             element={
               <ProtectedRoute allowedRoles={['admin']}>
                 <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Account & Profile Settings */}
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute allowedRoles={['donor', 'recipient', 'admin']}>
+                <SettingsPage />
               </ProtectedRoute>
             }
           />

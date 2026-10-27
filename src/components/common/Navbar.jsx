@@ -15,6 +15,7 @@ import {
   LogOut,
   LogIn,
   Zap,
+  Settings,
   RefreshCw
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
@@ -376,8 +377,20 @@ export const Navbar = () => {
                     </div>
                   </button>
 
+                  {/* Account Settings Menu Link */}
+                  <div className="mt-2 pt-2 border-t border-gray-100 px-1">
+                    <Link
+                      to="/settings"
+                      onClick={() => setRoleDropdownOpen(false)}
+                      className="w-full flex items-center gap-2 p-2 rounded-xl text-left text-xs font-bold text-gray-700 hover:text-[#0f392b] hover:bg-emerald-50 transition-all cursor-pointer"
+                    >
+                      <Settings className="w-3.5 h-3.5 text-[#0f392b]" />
+                      <span>Account Settings</span>
+                    </Link>
+                  </div>
+
                   {/* Sign Out Action */}
-                  <div className="mt-2 pt-2 border-t border-gray-100 flex flex-col gap-1 px-1">
+                  <div className="pt-1 border-t border-gray-100 flex flex-col gap-1 px-1">
                     <button
                       onClick={() => {
                         logout();
@@ -490,6 +503,15 @@ export const Navbar = () => {
                   NGO Hub
                 </Link>
               </div>
+
+              <Link
+                to="/settings"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 p-2.5 rounded-xl hover:bg-gray-50 text-xs font-bold text-gray-700 border border-gray-100"
+              >
+                <Settings className="w-4 h-4 text-[#0f392b]" />
+                <span>Account & Profile Settings</span>
+              </Link>
 
               <div className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 border border-gray-100">
                 <div className="flex items-center gap-2">

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   PlusCircle, 
   Clock, 
@@ -12,7 +13,8 @@ import {
   ExternalLink,
   Key,
   Users,
-  AlertCircle
+  AlertCircle,
+  Settings
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { TiltCard } from '../components/3d/TiltCard';
@@ -100,13 +102,24 @@ export const DonorDashboard = () => {
           </div>
         </div>
 
-        <button
-          onClick={() => setIsPostWizardOpen(true)}
-          className="px-6 py-3 rounded-2xl bg-[#0f392b] hover:bg-[#164e3b] text-white text-xs font-bold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 hover:-translate-y-0.5"
-        >
-          <PlusCircle className="w-4 h-4 text-[#84cc16]" />
-          <span>Post New Surplus Listing</span>
-        </button>
+        <div className="flex items-center gap-2.5">
+          <Link
+            to="/settings"
+            className="px-4 py-3 rounded-2xl bg-white border border-gray-200 hover:border-[#84cc16] hover:bg-[#84cc16]/10 text-[#0f392b] text-xs font-bold shadow-xs hover:shadow-md transition-all flex items-center justify-center gap-1.5"
+            title="Account & Profile Settings"
+          >
+            <Settings className="w-4 h-4 text-[#84cc16]" />
+            <span>Settings</span>
+          </Link>
+
+          <button
+            onClick={() => setIsPostWizardOpen(true)}
+            className="px-6 py-3 rounded-2xl bg-[#0f392b] hover:bg-[#164e3b] text-white text-xs font-bold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 hover:-translate-y-0.5"
+          >
+            <PlusCircle className="w-4 h-4 text-[#84cc16]" />
+            <span>Post New Surplus Listing</span>
+          </button>
+        </div>
       </div>
 
       {/* KPI Metrics */}

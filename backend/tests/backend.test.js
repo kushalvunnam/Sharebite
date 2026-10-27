@@ -161,6 +161,92 @@ describe('ShareBite Backend API Test Suite', () => {
     });
   });
 
+  // User Profile & Settings API (/api/users)
+  describe('User Profile & Settings API (/api/users)', () => {
+    it('should reject GET /api/users/me without token', async () => {
+      const res = await request(app).get('/api/users/me');
+      assert.strictEqual(res.status, 401);
+      assert.strictEqual(res.body.success, false);
+    });
+
+    it('should return authenticated user profile on GET /api/users/me', async () => {
+      const res = await request(app)
+        .get('/api/users/me')
+        .set('Authorization', `Bearer ${donorToken}`);
+
+      assert.strictEqual(res.status, 200);
+      assert.strictEqual(res.body.success, true);
+      assert.strictEqual(res.body.user.email, 'marco@verdeosteria.com');
+      assert.strictEqual(res.body.user.role, 'donor');
+      assert.strictEqual(res.body.user.passwordHash, undefined);
+    });
+
+    it('should reject PATCH /api/users/me with empty name', async () => {
+      const res = await request(app)
+        .patch('/api/users/me')
+        .set('Authorization', `Bearer ${donorToken}`)
+        .send({ name: '   ' });
+
+      assert.strictEqual(res.status, 400);
+      assert.strictEqual(res.body.success, false);
+      assert.match(res.body.message, /empty/i);
+    });
+
+    it('should reject PATCH /api/users/me with name shorter than 2 characters', async () => {
+      const res = await request(app)
+        .patch('/api/users/me')
+        .set('Authorization', `Bearer ${donorToken}`)
+        .send({ name: 'A' });
+
+      assert.strictEqual(res.status, 400);
+      assert.strictEqual(res.body.success, false);
+      assert.match(res.body.message, /short/i);
+    });
+
+    it('should reject PATCH /api/users/me when attempting to tamper with role, email, or password', async () => {
+      const res = await request(app)
+        .patch('/api/users/me')
+        .set('Authorization', `Bearer ${donorToken}`)
+        .send({ role: 'admin', name: 'Marco Hacker' });
+
+      assert.strictEqual(res.status, 400);
+      assert.strictEqual(res.body.success, false);
+      assert.match(res.body.message, /Security Notice/i);
+
+      // Verify donor role remained unchanged
+      const checkRes = await request(app)
+        .get('/api/users/me')
+        .set('Authorization', `Bearer ${donorToken}`);
+      assert.strictEqual(checkRes.body.user.role, 'donor');
+    });
+
+    it('should update user name and preferences successfully on PATCH /api/users/me', async () => {
+      const res = await request(app)
+        .patch('/api/users/me')
+        .set('Authorization', `Bearer ${donorToken}`)
+        .send({
+          name: 'Executive Chef Marco Rossi',
+          preferences: {
+            urgentAlerts: false,
+            soundAlerts: true,
+          },
+        });
+
+      assert.strictEqual(res.status, 200);
+      assert.strictEqual(res.body.success, true);
+      assert.strictEqual(res.body.user.name, 'Executive Chef Marco Rossi');
+      assert.strictEqual(res.body.user.preferences.urgentAlerts, false);
+      assert.strictEqual(res.body.user.preferences.soundAlerts, true);
+      assert.strictEqual(res.body.user.passwordHash, undefined);
+
+      // Verify recipient user was not affected
+      const recipCheck = await request(app)
+        .get('/api/users/me')
+        .set('Authorization', `Bearer ${recipientToken}`);
+      assert.strictEqual(recipCheck.body.user.name, 'Sarah Lin');
+    });
+  });
+
   // 3. Food Listings API
   describe('Food Listing API (/api/listings)', () => {
     it('should reject listing creation from recipient role (role check)', async () => {

@@ -192,6 +192,19 @@ export const api = {
     },
   },
 
+  // Users
+  users: {
+    getMe: async () => {
+      return request('/users/me', { method: 'GET' });
+    },
+    updateMe: async (userData) => {
+      return request('/users/me', {
+        method: 'PATCH',
+        body: JSON.stringify(userData),
+      });
+    },
+  },
+
   // Token helper
   setAuthToken,
   getAuthToken,

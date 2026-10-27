@@ -86,6 +86,12 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    preferences: {
+      urgentAlerts: { type: Boolean, default: true },
+      soundAlerts: { type: Boolean, default: true },
+      weeklyDigest: { type: Boolean, default: true },
+      autoRefresh: { type: Boolean, default: false },
+    },
   },
   {
     timestamps: true,

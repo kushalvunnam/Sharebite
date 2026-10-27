@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   ShieldCheck, 
   AlertTriangle, 
@@ -8,10 +9,11 @@ import {
   TrendingUp, 
   Search, 
   Filter, 
-  Activity,
-  Award,
-  Clock,
-  Eye
+  Activity, 
+  Award, 
+  Clock, 
+  Eye,
+  Settings
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { TiltCard } from '../components/3d/TiltCard';
@@ -45,9 +47,20 @@ export const AdminDashboard = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/10 text-xs font-semibold">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#84cc16] animate-ping" />
-          <span>Automated Safety Engine: Online</span>
+        <div className="flex items-center gap-3">
+          <Link
+            to="/settings"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white text-xs font-bold transition-all shadow-xs"
+            title="Account & Compliance Settings"
+          >
+            <Settings className="w-4 h-4 text-[#84cc16]" />
+            <span>Settings</span>
+          </Link>
+
+          <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/10 text-xs font-semibold">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#84cc16] animate-ping" />
+            <span>Automated Safety Engine: Online</span>
+          </div>
         </div>
       </div>
 

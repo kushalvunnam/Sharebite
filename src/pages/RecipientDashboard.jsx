@@ -12,7 +12,8 @@ import {
   Key,
   XCircle,
   Truck,
-  ExternalLink
+  ExternalLink,
+  Settings
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { TiltCard } from '../components/3d/TiltCard';
@@ -73,13 +74,24 @@ export const RecipientDashboard = () => {
           </div>
         </div>
 
-        <Link
-          to="/explore"
-          className="px-6 py-3 rounded-2xl bg-[#0f392b] hover:bg-[#164e3b] text-white text-xs font-bold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
-        >
-          <Search className="w-4 h-4 text-[#84cc16]" />
-          <span>Browse Available Surplus</span>
-        </Link>
+        <div className="flex items-center gap-2.5">
+          <Link
+            to="/settings"
+            className="px-4 py-3 rounded-2xl bg-white border border-gray-200 hover:border-[#f97316] hover:bg-[#f97316]/10 text-[#0f392b] text-xs font-bold shadow-xs hover:shadow-md transition-all flex items-center justify-center gap-1.5"
+            title="Account & Profile Settings"
+          >
+            <Settings className="w-4 h-4 text-[#f97316]" />
+            <span>Settings</span>
+          </Link>
+
+          <Link
+            to="/explore"
+            className="px-6 py-3 rounded-2xl bg-[#0f392b] hover:bg-[#164e3b] text-white text-xs font-bold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
+          >
+            <Search className="w-4 h-4 text-[#84cc16]" />
+            <span>Browse Available Surplus</span>
+          </Link>
+        </div>
       </div>
 
       {/* KPI Cards */}

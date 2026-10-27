@@ -308,6 +308,60 @@ export const AppProvider = ({ children }) => {
     showToast('Logged out successfully', 'info');
   };
 
+  // Update authenticated user's profile and preferences
+  const updateUserProfile = async ({ name, preferences, organization }) => {
+    setIsLoading(true);
+    try {
+      if (apiStatus === 'connected') {
+        const updatePayload = {};
+        if (name !== undefined) updatePayload.name = name;
+        if (organization !== undefined) updatePayload.organizationName = organization;
+        if (preferences !== undefined) updatePayload.preferences = preferences;
+
+        const res = await api.users.updateMe(updatePayload);
+        if (res && res.user) {
+          const updatedUser = {
+            ...currentUser,
+            name: res.user.name,
+            organization: res.user.organizationName || currentUser?.organization,
+            preferences: res.user.preferences || preferences || currentUser?.preferences,
+          };
+          setCurrentUser(updatedUser);
+          showToast('Profile updated successfully!', 'success');
+          setIsLoading(false);
+          return { success: true, user: updatedUser };
+        }
+      }
+    } catch (err) {
+      if (!err.isOffline) {
+        showToast(err.message || 'Failed to update profile', 'error');
+        setIsLoading(false);
+        return { success: false, message: err.message };
+      }
+    }
+
+    // Fallback: simulated update for demo/offline mode
+    const updatedUser = {
+      ...currentUser,
+      ...(name !== undefined ? { name: name.trim() } : {}),
+      ...(organization !== undefined ? { organization: organization.trim() } : {}),
+      preferences: {
+        ...(currentUser?.preferences || {
+          urgentAlerts: true,
+          soundAlerts: true,
+          weeklyDigest: true,
+          autoRefresh: false,
+        }),
+        ...(preferences || {}),
+      },
+    };
+
+    setCurrentUser(updatedUser);
+    showToast('Profile updated successfully!', 'success');
+    setIsLoading(false);
+    return { success: true, user: updatedUser };
+  };
+
   // Claim a donation
   const claimDonation = async (donationId, recipientName) => {
     const claimer = recipientName || currentUser?.organization || "Eastside Hope Food Rescue";
@@ -527,6 +581,7 @@ export const AppProvider = ({ children }) => {
         registerUser,
         customLogin,
         logout,
+        updateUserProfile,
         claimDonation,
         completeDonation,
         addDonation,
