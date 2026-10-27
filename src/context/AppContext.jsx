@@ -1,10 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { 
   INITIAL_DONATIONS, 
-  INITIAL_DONORS, 
-  INITIAL_RECIPIENTS, 
-  INITIAL_NOTIFICATIONS,
-  IMPACT_METRICS 
+  INITIAL_NOTIFICATIONS 
 } from '../data/demoData';
 import api from '../services/api';
 
@@ -102,9 +99,6 @@ export const AppProvider = ({ children }) => {
     }
   });
 
-  // Active user's donation requests (from backend)
-  const [myRequests, setMyRequests] = useState([]);
-
   // Modals & UI states
   const [selectedDonation, setSelectedDonation] = useState(null);
   const [isPostWizardOpen, setIsPostWizardOpen] = useState(false);
@@ -158,6 +152,7 @@ export const AppProvider = ({ children }) => {
               avatar: userRes.user.profileDetails?.avatar,
               safetyLicense: userRes.user.profileDetails?.safetyLicense,
               taxId: userRes.user.profileDetails?.taxId,
+              isVerified: Boolean(userRes.user.isVerified),
               preferences: userRes.user.preferences,
             };
             setCurrentUser(userObj);
@@ -243,6 +238,7 @@ export const AppProvider = ({ children }) => {
           avatar: res.user.profileDetails?.avatar,
           safetyLicense: res.user.profileDetails?.safetyLicense,
           taxId: res.user.profileDetails?.taxId,
+          isVerified: Boolean(res.user.isVerified),
           preferences: res.user.preferences,
         };
         setCurrentUser(userObj);
@@ -276,6 +272,7 @@ export const AppProvider = ({ children }) => {
           avatar: res.user.profileDetails?.avatar,
           safetyLicense: res.user.profileDetails?.safetyLicense,
           taxId: res.user.profileDetails?.taxId,
+          isVerified: Boolean(res.user.isVerified),
           preferences: res.user.preferences,
         };
         setCurrentUser(userObj);

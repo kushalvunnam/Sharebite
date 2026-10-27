@@ -61,11 +61,11 @@ export const RecipientDashboard = () => {
                 {currentUser?.organization || "Eastside Hope Food Rescue & Shelter"}
               </h1>
               <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${
-                currentUser?.verified 
+                (currentUser?.isVerified || currentUser?.verified)
                   ? "bg-[#f97316]/20 text-[#f97316] border-[#f97316]/30"
                   : "bg-gray-100 text-gray-600 border-gray-200"
               }`}>
-                {currentUser?.verified ? "VERIFIED 501(c)(3) CHARITY" : "NOT VERIFIED"}
+                {(currentUser?.isVerified || currentUser?.verified) ? "VERIFIED 501(c)(3) CHARITY" : "NOT VERIFIED"}
               </span>
             </div>
             <p className="text-xs text-gray-500 mt-0.5">

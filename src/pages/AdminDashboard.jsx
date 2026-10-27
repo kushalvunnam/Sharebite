@@ -5,22 +5,14 @@ import {
   AlertTriangle, 
   CheckCircle2, 
   Users, 
-  FileText, 
-  TrendingUp, 
   Search, 
-  Filter, 
   Activity, 
-  Award, 
   Clock, 
-  Eye, 
   Settings, 
-  Loader2, 
   RefreshCw, 
   XCircle, 
   Check, 
   Ban, 
-  AlertCircle, 
-  ArrowUpRight, 
   BarChart3, 
   History, 
   Building2, 
@@ -28,9 +20,6 @@ import {
   Utensils, 
   Sparkles, 
   ChevronRight, 
-  Lock,
-  MessageSquare,
-  ThermometerSnowflake,
   ShieldAlert,
   Scale
 } from 'lucide-react';
@@ -40,7 +29,7 @@ import api from '../services/api';
 
 export const AdminDashboard = () => {
   const navigate = useNavigate();
-  const { currentUser, showToast, apiStatus, setSelectedDonation } = useApp();
+  const { currentUser, showToast, setSelectedDonation } = useApp();
 
   // Active Tab: 'overview' | 'verification' | 'reports' | 'listings' | 'audit'
   const [activeTab, setActiveTab] = useState('overview');

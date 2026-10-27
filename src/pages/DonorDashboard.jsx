@@ -89,11 +89,11 @@ export const DonorDashboard = () => {
                 {currentUser?.organization || "Verde Artisan Osteria"}
               </h1>
               <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${
-                currentUser?.verified
+                (currentUser?.isVerified || currentUser?.verified)
                   ? "bg-[#84cc16]/20 text-[#0f392b] border-[#84cc16]/30"
                   : "bg-gray-100 text-gray-600 border-gray-200"
               }`}>
-                {currentUser?.verified ? "VERIFIED DONOR KITCHEN" : "NOT VERIFIED"}
+                {(currentUser?.isVerified || currentUser?.verified) ? "VERIFIED DONOR KITCHEN" : "NOT VERIFIED"}
               </span>
             </div>
             <p className="text-xs text-gray-500 mt-0.5">

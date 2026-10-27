@@ -17,6 +17,15 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 
+const allowedOrigins = [
+  CLIENT_URL,
+  'https://sharebite-lovat.vercel.app',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:4173',
+  'http://127.0.0.1:4173',
+];
+
 // CORS configuration for authorized client origin
 app.use(
   cors({
@@ -24,9 +33,8 @@ app.use(
       // Allow requests with no origin (like mobile apps, curl, or server-to-server)
       if (!origin) return callback(null, true);
       if (
-        origin === CLIENT_URL ||
-        origin === 'http://localhost:5173' ||
-        origin === 'http://127.0.0.1:5173' ||
+        allowedOrigins.includes(origin) ||
+        origin.endsWith('.vercel.app') ||
         process.env.NODE_ENV === 'development'
       ) {
         return callback(null, true);

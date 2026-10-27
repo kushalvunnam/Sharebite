@@ -11,10 +11,8 @@ const seedInitialAccounts = async () => {
     if (adminCount === 0) {
       const salt = await bcrypt.genSalt(10);
       const adminPassHash = await bcrypt.hash('AdminPassword123!', salt);
-      const donorPassHash = await bcrypt.hash('DonorPassword123!', salt);
-      const recipPassHash = await bcrypt.hash('ShelterPassword123!', salt);
 
-      await User.insertMany([
+      const accountsToSeed = [
         {
           name: 'David Vance',
           email: 'david.safety@sharebite.org',
@@ -35,28 +33,38 @@ const seedInitialAccounts = async () => {
           address: 'ShareBite HQ, Innovation Way, NY',
           isVerified: true,
         },
-        {
-          name: 'Chef Marco Rossi',
-          email: 'marco@verdeosteria.com',
-          passwordHash: donorPassHash,
-          role: 'donor',
-          organizationName: 'Verde Artisan Osteria',
-          phone: '+1 (555) 234-5678',
-          address: '412 Mulberry St, Downtown',
-          isVerified: true,
-        },
-        {
-          name: 'Sarah Lin',
-          email: 'sarah@eastsidehope.org',
-          passwordHash: recipPassHash,
-          role: 'recipient',
-          organizationName: 'Eastside Hope Food Rescue & Shelter',
-          phone: '+1 (555) 876-5432',
-          address: '320 Oak Ridge Rd, East District',
-          isVerified: true,
-        },
-      ]);
-      console.log('[ShareBite DB] Verified default accounts initialized in MongoDB (Admin, Donor, Recipient).');
+      ];
+
+      // In non-production environments only, provide demo profiles for testing
+      if (process.env.NODE_ENV !== 'production') {
+        const donorPassHash = await bcrypt.hash('DonorPassword123!', salt);
+        const recipPassHash = await bcrypt.hash('ShelterPassword123!', salt);
+        accountsToSeed.push(
+          {
+            name: 'Chef Marco Rossi',
+            email: 'marco@verdeosteria.com',
+            passwordHash: donorPassHash,
+            role: 'donor',
+            organizationName: 'Verde Artisan Osteria',
+            phone: '+1 (555) 234-5678',
+            address: '412 Mulberry St, Downtown',
+            isVerified: true,
+          },
+          {
+            name: 'Sarah Lin',
+            email: 'sarah@eastsidehope.org',
+            passwordHash: recipPassHash,
+            role: 'recipient',
+            organizationName: 'Eastside Hope Food Rescue & Shelter',
+            phone: '+1 (555) 876-5432',
+            address: '320 Oak Ridge Rd, East District',
+            isVerified: true,
+          }
+        );
+      }
+
+      await User.insertMany(accountsToSeed);
+      console.log(`[ShareBite DB] Essential initial accounts provisioned (${accountsToSeed.length} accounts).`);
     }
   } catch (err) {
     console.warn('[ShareBite DB] Initial accounts provisioning:', err.message);
