@@ -7,13 +7,9 @@ import {
   ShieldCheck, 
   DollarSign, 
   Utensils, 
-  QrCode, 
   FileText, 
-  Download, 
-  ExternalLink,
   Key,
   Users,
-  AlertCircle,
   Settings
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
@@ -122,9 +118,83 @@ export const DonorDashboard = () => {
         </div>
       </div>
 
+      {/* Visual Donation Lifecycle Stepper / Chain of Custody */}
+      <div className="bg-white/80 backdrop-blur-md p-6 rounded-3xl border border-[#0f392b]/10 shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#0f392b]/60 flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4 text-[#84cc16]" /> Safe Redistribution Chain of Custody
+            </span>
+            <h3 className="text-base font-bold text-[#0f392b] font-['Outfit'] mt-0.5">
+              Surplus Lifecycle & Real-Time Handoff Flow
+            </h3>
+          </div>
+          <span className="hidden sm:inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-bold bg-[#84cc16]/20 text-[#0f392b]">
+            <span className="w-2 h-2 rounded-full bg-[#84cc16] animate-pulse"></span> HACCP Compliant
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 relative">
+          <div className="p-3.5 rounded-2xl bg-[#faf7f2] border border-[#0f392b]/10 flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded-md bg-[#0f392b] text-white">01</span>
+              <Utensils className="w-4 h-4 text-[#0f392b]" />
+            </div>
+            <div className="mt-3">
+              <div className="text-xs font-bold text-gray-900">Batch Logged</div>
+              <div className="text-[10px] text-gray-500 mt-0.5">Kitchen logs portions & temp requirements</div>
+            </div>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-[#faf7f2] border border-[#0f392b]/10 flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded-md bg-[#84cc16] text-[#0f392b]">02</span>
+              <Users className="w-4 h-4 text-[#0f392b]" />
+            </div>
+            <div className="mt-3">
+              <div className="text-xs font-bold text-gray-900">Shelter Claim</div>
+              <div className="text-[10px] text-gray-500 mt-0.5">Verified local NGO claims surplus package</div>
+            </div>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-[#faf7f2] border border-[#0f392b]/10 flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded-md bg-amber-500 text-white">03</span>
+              <Clock className="w-4 h-4 text-amber-600" />
+            </div>
+            <div className="mt-3">
+              <div className="text-xs font-bold text-gray-900">Transport Window</div>
+              <div className="text-[10px] text-gray-500 mt-0.5">Safe pickup time window & real-time ETA</div>
+            </div>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-[#faf7f2] border border-[#0f392b]/10 flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded-md bg-purple-600 text-white">04</span>
+              <Key className="w-4 h-4 text-purple-600" />
+            </div>
+            <div className="mt-3">
+              <div className="text-xs font-bold text-gray-900">OTP Handshake</div>
+              <div className="text-[10px] text-gray-500 mt-0.5">6-digit cryptographic verification on arrival</div>
+            </div>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-[#faf7f2] border border-[#0f392b]/10 flex flex-col justify-between col-span-2 md:col-span-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded-md bg-emerald-700 text-white">05</span>
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            </div>
+            <div className="mt-3">
+              <div className="text-xs font-bold text-gray-900">Tax Certified</div>
+              <div className="text-[10px] text-gray-500 mt-0.5">IRS 170(e)(3) deduction certificate issued</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* KPI Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <TiltCard className="p-5 rounded-3xl bg-white border border-gray-100 shadow-sm flex flex-col justify-between">
+        <TiltCard className="p-5 rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-gray-400 uppercase">Meals Donated</span>
             <div className="p-2 rounded-xl bg-[#84cc16]/20 text-[#0f392b]">
@@ -139,7 +209,7 @@ export const DonorDashboard = () => {
           </div>
         </TiltCard>
 
-        <TiltCard className="p-5 rounded-3xl bg-white border border-gray-100 shadow-sm flex flex-col justify-between">
+        <TiltCard className="p-5 rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-gray-400 uppercase">Estimated Tax Credit</span>
             <div className="p-2 rounded-xl bg-emerald-100 text-emerald-800">
@@ -154,7 +224,7 @@ export const DonorDashboard = () => {
           </div>
         </TiltCard>
 
-        <TiltCard className="p-5 rounded-3xl bg-white border border-gray-100 shadow-sm flex flex-col justify-between">
+        <TiltCard className="p-5 rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-gray-400 uppercase">Safety Rating</span>
             <div className="p-2 rounded-xl bg-[#0f392b]/10 text-[#0f392b]">
@@ -169,7 +239,7 @@ export const DonorDashboard = () => {
           </div>
         </TiltCard>
 
-        <TiltCard className="p-5 rounded-3xl bg-white border border-gray-100 shadow-sm flex flex-col justify-between">
+        <TiltCard className="p-5 rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-gray-400 uppercase">Active Pickups</span>
             <div className="p-2 rounded-xl bg-amber-100 text-amber-800">
@@ -247,7 +317,7 @@ export const DonorDashboard = () => {
               Kitchen Surplus Inventory & History
             </h3>
             <p className="text-xs text-gray-500">
-              Live status of all batches logged by your culinary staff
+              Live status of all batches ({availableListings.length} available, {activeClaimed.length} claimed, {completedListings.length} completed)
             </p>
           </div>
 

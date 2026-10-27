@@ -96,7 +96,7 @@ export const RecipientDashboard = () => {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <TiltCard className="p-5 rounded-3xl bg-white border border-gray-100 shadow-sm flex flex-col justify-between">
+        <TiltCard className="p-5 rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-gray-400 uppercase">Meals Distributed</span>
             <div className="p-2 rounded-xl bg-[#84cc16]/20 text-[#0f392b]">
@@ -111,7 +111,7 @@ export const RecipientDashboard = () => {
           </div>
         </TiltCard>
 
-        <TiltCard className="p-5 rounded-3xl bg-white border border-gray-100 shadow-sm flex flex-col justify-between">
+        <TiltCard className="p-5 rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-gray-400 uppercase">Families Supported</span>
             <div className="p-2 rounded-xl bg-amber-100 text-amber-800">
@@ -126,7 +126,7 @@ export const RecipientDashboard = () => {
           </div>
         </TiltCard>
 
-        <TiltCard className="p-5 rounded-3xl bg-white border border-gray-100 shadow-sm flex flex-col justify-between">
+        <TiltCard className="p-5 rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-gray-400 uppercase">Budget Saved</span>
             <div className="p-2 rounded-xl bg-emerald-100 text-emerald-800">
@@ -141,7 +141,7 @@ export const RecipientDashboard = () => {
           </div>
         </TiltCard>
 
-        <TiltCard className="p-5 rounded-3xl bg-white border border-gray-100 shadow-sm flex flex-col justify-between">
+        <TiltCard className="p-5 rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-gray-400 uppercase">Pending Pickups</span>
             <div className="p-2 rounded-xl bg-[#f97316]/10 text-[#f97316]">
@@ -155,6 +155,30 @@ export const RecipientDashboard = () => {
             Scheduled for collection today
           </div>
         </TiltCard>
+      </div>
+
+      {/* Volunteer Transport & Cold-Chain Checklist Banner */}
+      <div className="bg-[#faf7f2] p-5 sm:p-6 rounded-3xl border border-[#0f392b]/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-[#0f392b] text-[#84cc16] flex items-center justify-center shrink-0">
+            <ShieldCheck className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-[#0f392b]">Food Rescue Transport Standards</h3>
+            <p className="text-xs text-gray-600">Ensure food safety compliance before dispatching drivers to commercial kitchens.</p>
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-gray-700">
+          <span className="px-3 py-1 rounded-full bg-white border border-gray-200 shadow-2xs flex items-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5 text-[#84cc16]" /> Insulated Thermal Bags
+          </span>
+          <span className="px-3 py-1 rounded-full bg-white border border-gray-200 shadow-2xs flex items-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5 text-[#84cc16]" /> Clean Vehicle Interior
+          </span>
+          <span className="px-3 py-1 rounded-full bg-white border border-gray-200 shadow-2xs flex items-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5 text-[#84cc16]" /> Digital Pass with OTP
+          </span>
+        </div>
       </div>
 
       {/* Section 1: Active Reserved Pickups */}
