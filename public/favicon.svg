@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Outer warm glow/circle -->
+  <circle cx="50" cy="50" r="46" fill="#0f392b" stroke="#84cc16" stroke-width="4"/>
+  <!-- Food bowl / plate curve -->
+  <path d="M22 54 C24 74, 76 74, 78 54 Z" fill="#faf7f2" />
+  <ellipse cx="50" cy="54" rx="28" ry="6" fill="#e2ded4" />
+  <!-- Sprouting Leaf / Heart fusion -->
+  <path d="M50 24 C42 16 30 22 34 36 C37 46 50 52 50 52 C50 52 63 46 66 36 C70 22 58 16 50 24 Z" fill="#84cc16" />
+  <path d="M50 26 C48 34 46 42 50 48" stroke="#0f392b" stroke-width="2.5" stroke-linecap="round" />
+  <!-- Small fresh sparkle -->
+  <circle cx="72" cy="26" r="4" fill="#f97316" />
+</svg>

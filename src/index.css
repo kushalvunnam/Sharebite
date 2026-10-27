@@ -1,0 +1,131 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --forest-950: #092119;
+    --forest-900: #0f392b;
+    --forest-800: #164e3b;
+    --forest-700: #1d644d;
+    --forest-600: #267c61;
+    --forest-500: #319777;
+    --lime-500: #84cc16;
+    --lime-400: #a3e635;
+    --lime-300: #bef264;
+    --ivory-50: #fdfbf7;
+    --ivory-100: #faf7f2;
+    --ivory-200: #f3eee4;
+    --ivory-300: #e8e0d1;
+    --accent-orange: #f97316;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: #faf7f2;
+    color: #1a2e26;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+}
+
+/* 3D and Dimensional Design Utilities */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.perspective-2000 {
+  perspective: 2000px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.card-3d-shadow {
+  box-shadow: 
+    0 10px 30px -10px rgba(15, 57, 43, 0.12),
+    0 20px 40px -15px rgba(15, 57, 43, 0.08),
+    0 0 0 1px rgba(15, 57, 43, 0.05);
+}
+
+.card-3d-shadow-hover:hover {
+  box-shadow: 
+    0 20px 40px -12px rgba(15, 57, 43, 0.22),
+    0 30px 60px -20px rgba(132, 204, 22, 0.18),
+    0 0 0 1px rgba(132, 204, 22, 0.3);
+}
+
+.glow-lime {
+  filter: drop-shadow(0 0 20px rgba(132, 204, 22, 0.35));
+}
+
+.glow-forest {
+  filter: drop-shadow(0 15px 35px rgba(15, 57, 43, 0.3));
+}
+
+/* Floating animation */
+@keyframes float-gentle {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(1.5deg);
+  }
+}
+
+@keyframes float-reverse {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(12px) rotate(-2deg);
+  }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-float {
+  animation: float-gentle 6s ease-in-out infinite;
+}
+
+.animate-float-reverse {
+  animation: float-reverse 7s ease-in-out infinite;
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 4s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 35s linear infinite;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

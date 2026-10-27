@@ -1,0 +1,376 @@
+import React, { useState } from 'react';
+import { 
+  PlusCircle, 
+  Clock, 
+  CheckCircle2, 
+  ShieldCheck, 
+  DollarSign, 
+  Utensils, 
+  QrCode, 
+  FileText, 
+  Download, 
+  ExternalLink,
+  Key,
+  Users,
+  AlertCircle
+} from 'lucide-react';
+import { useApp } from '../context/AppContext';
+import { TiltCard } from '../components/3d/TiltCard';
+import confetti from 'canvas-confetti';
+
+export const DonorDashboard = () => {
+  const { 
+    currentUser, 
+    donations, 
+    setIsPostWizardOpen, 
+    completeDonation, 
+    setSelectedDonation 
+  } = useApp();
+
+  const [verifyingDonation, setVerifyingDonation] = useState(null);
+  const [enteredOtp, setEnteredOtp] = useState('');
+  const [downloadSuccess, setDownloadSuccess] = useState(false);
+
+  // Filter donor's listings (or fallback to demo items)
+  const donorListings = donations.filter(d => 
+    d.donorId === currentUser?.id || d.donorName.includes("Verde") || d.donorName.includes("Golden Harvest")
+  );
+
+  const activeClaimed = donorListings.filter(d => d.status === 'claimed');
+  const availableListings = donorListings.filter(d => d.status === 'available');
+  const completedListings = donorListings.filter(d => d.status === 'completed');
+
+  const totalPortionsDonated = donorListings.reduce((sum, d) => sum + (d.servings || 0), 1420);
+  const totalTaxSavedUsd = Math.round(totalPortionsDonated * 3.8);
+
+  const handleVerifyOtp = (e) => {
+    e.preventDefault();
+    if (!verifyingDonation) return;
+
+    const res = completeDonation(verifyingDonation.id, enteredOtp);
+    if (res.success) {
+      try {
+        confetti({
+          particleCount: 90,
+          spread: 75,
+          origin: { y: 0.6 }
+        });
+      } catch {
+        // ignore
+      }
+      setVerifyingDonation(null);
+      setEnteredOtp('');
+    }
+  };
+
+  const handleDownloadTaxCert = () => {
+    setDownloadSuccess(true);
+    setTimeout(() => setDownloadSuccess(false), 3000);
+  };
+
+  return (
+    <div className="min-h-screen py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      
+      {/* Top Welcome & Actions Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-[#84cc16] shrink-0">
+            <img
+              src={currentUser?.avatar || "https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&w=200&q=80"}
+              alt="Kitchen Manager"
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold text-[#0f392b] font-['Outfit']">
+                {currentUser?.organization || "Verde Artisan Osteria"}
+              </h1>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-[#84cc16]/20 text-[#0f392b] border border-[#84cc16]/30">
+                VERIFIED DONOR KITCHEN
+              </span>
+            </div>
+            <p className="text-xs text-gray-500 mt-0.5">
+              Managed by <strong className="text-gray-800">{currentUser?.name}</strong> • Food Safety License: {currentUser?.safetyLicense || "FSSAI / FDA #8841-A"}
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => setIsPostWizardOpen(true)}
+          className="px-6 py-3 rounded-2xl bg-[#0f392b] hover:bg-[#164e3b] text-white text-xs font-bold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 hover:-translate-y-0.5"
+        >
+          <PlusCircle className="w-4 h-4 text-[#84cc16]" />
+          <span>Post New Surplus Listing</span>
+        </button>
+      </div>
+
+      {/* KPI Metrics */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <TiltCard className="p-5 rounded-3xl bg-white border border-gray-100 shadow-sm flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-gray-400 uppercase">Meals Donated</span>
+            <div className="p-2 rounded-xl bg-[#84cc16]/20 text-[#0f392b]">
+              <Utensils className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="text-3xl font-black text-[#0f392b] font-['Outfit'] mt-2">
+            {totalPortionsDonated.toLocaleString()}
+          </div>
+          <div className="text-[11px] text-gray-500 mt-1">
+            ~{(totalPortionsDonated * 0.45).toFixed(0)} kg food preserved
+          </div>
+        </TiltCard>
+
+        <TiltCard className="p-5 rounded-3xl bg-white border border-gray-100 shadow-sm flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-gray-400 uppercase">Estimated Tax Credit</span>
+            <div className="p-2 rounded-xl bg-emerald-100 text-emerald-800">
+              <DollarSign className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="text-3xl font-black text-emerald-800 font-['Outfit'] mt-2">
+            ${totalTaxSavedUsd.toLocaleString()}
+          </div>
+          <div className="text-[11px] text-gray-500 mt-1">
+            IRS Sec. 170(e)(3) deduction
+          </div>
+        </TiltCard>
+
+        <TiltCard className="p-5 rounded-3xl bg-white border border-gray-100 shadow-sm flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-gray-400 uppercase">Safety Rating</span>
+            <div className="p-2 rounded-xl bg-[#0f392b]/10 text-[#0f392b]">
+              <ShieldCheck className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="text-3xl font-black text-[#0f392b] font-['Outfit'] mt-2">
+            4.95 / 5.0
+          </div>
+          <div className="text-[11px] text-[#84cc16] font-bold mt-1">
+            100% HACCP temperature compliance
+          </div>
+        </TiltCard>
+
+        <TiltCard className="p-5 rounded-3xl bg-white border border-gray-100 shadow-sm flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-gray-400 uppercase">Active Pickups</span>
+            <div className="p-2 rounded-xl bg-amber-100 text-amber-800">
+              <Clock className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="text-3xl font-black text-amber-700 font-['Outfit'] mt-2">
+            {activeClaimed.length} Pending
+          </div>
+          <div className="text-[11px] text-gray-500 mt-1">
+            Shelters arriving today
+          </div>
+        </TiltCard>
+      </div>
+
+      {/* Urgent Handoff Notice: Items Claimed by Shelters */}
+      {activeClaimed.length > 0 && (
+        <div className="p-6 rounded-3xl bg-amber-50 border border-amber-200 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-amber-800 font-bold text-sm">
+              <Clock className="w-5 h-5 text-amber-600 animate-spin-slow" />
+              <span>Pending Volunteer Pickups Requiring Verification</span>
+            </div>
+            <span className="text-xs font-bold bg-amber-200 text-amber-900 px-3 py-1 rounded-full">
+              {activeClaimed.length} Action Needed
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {activeClaimed.map((item) => (
+              <div
+                key={item.id}
+                className="bg-white p-4 rounded-2xl border border-amber-200 shadow-xs flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h4 className="font-bold text-sm text-gray-900">{item.title}</h4>
+                      <p className="text-xs text-amber-800 font-semibold mt-0.5">
+                        Claimed by: {item.claimedBy || "Eastside Hope Food Rescue"}
+                      </p>
+                    </div>
+                    <span className="text-xs font-extrabold text-[#0f392b] bg-[#84cc16]/20 px-2 py-0.5 rounded-md">
+                      {item.servings} Servings
+                    </span>
+                  </div>
+                  <div className="mt-2 text-xs text-gray-500 flex items-center gap-2">
+                    <span>Code: <strong className="text-gray-900">{item.verificationCode}</strong></span>
+                    <span>•</span>
+                    <span>Expected OTP: <strong className="text-amber-800 font-mono tracking-wider">{item.otpCode}</strong></span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setVerifyingDonation(item);
+                    setEnteredOtp(item.otpCode || '');
+                  }}
+                  className="mt-4 w-full py-2 rounded-xl bg-[#0f392b] hover:bg-[#164e3b] text-white text-xs font-bold transition-all flex items-center justify-center gap-2"
+                >
+                  <Key className="w-3.5 h-3.5 text-[#84cc16]" />
+                  <span>Verify Volunteer Handoff (Input OTP)</span>
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Main Table: Kitchen Surplus Inventory */}
+      <div className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+          <div>
+            <h3 className="font-bold text-lg text-[#0f392b] font-['Outfit']">
+              Kitchen Surplus Inventory & History
+            </h3>
+            <p className="text-xs text-gray-500">
+              Live status of all batches logged by your culinary staff
+            </p>
+          </div>
+
+          {/* Download Tax Compliance Summary */}
+          <button
+            onClick={handleDownloadTaxCert}
+            className="px-4 py-2 rounded-xl border border-gray-200 hover:border-[#84cc16] text-xs font-bold text-gray-700 hover:text-[#0f392b] flex items-center gap-1.5 transition-colors"
+          >
+            <FileText className="w-4 h-4 text-[#84cc16]" />
+            <span>{downloadSuccess ? 'Downloaded IRS Certificate!' : 'Export IRS 170(e)(3) Certificate'}</span>
+          </button>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-[#faf7f2] text-gray-500 uppercase tracking-wider font-bold border-b border-gray-100">
+              <tr>
+                <th className="p-4">Food Batch Title</th>
+                <th className="p-4">Portions</th>
+                <th className="p-4">Storage Protocol</th>
+                <th className="p-4">Status</th>
+                <th className="p-4">Recipient NGO</th>
+                <th className="p-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {donorListings.map((item) => (
+                <tr key={item.id} className="hover:bg-gray-50/70 transition-colors">
+                  <td className="p-4 font-bold text-gray-900 flex items-center gap-3">
+                    <img
+                      src={item.imageUrl}
+                      alt={item.title}
+                      className="w-10 h-10 rounded-xl object-cover shrink-0"
+                    />
+                    <div>
+                      <div className="line-clamp-1">{item.title}</div>
+                      <div className="text-[10px] text-gray-400 font-normal">
+                        Logged: {item.createdAt?.split('T')[0] || 'Today'}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="p-4 font-bold text-[#0f392b]">
+                    {item.servings} meals ({item.weightKg} kg)
+                  </td>
+                  <td className="p-4 text-gray-600 font-medium">
+                    {item.storageType}
+                  </td>
+                  <td className="p-4">
+                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase ${
+                      item.status === 'available'
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : item.status === 'claimed'
+                        ? 'bg-amber-100 text-amber-800 animate-pulse'
+                        : 'bg-gray-100 text-gray-700'
+                    }`}>
+                      {item.status}
+                    </span>
+                  </td>
+                  <td className="p-4 text-gray-700 font-semibold">
+                    {item.claimedBy || "—"}
+                  </td>
+                  <td className="p-4 text-right">
+                    <button
+                      onClick={() => setSelectedDonation(item)}
+                      className="text-[#0f392b] font-bold hover:underline"
+                    >
+                      View Details
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* OTP Verification Modal */}
+      {verifyingDonation && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-gray-100 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-[#84cc16]" />
+                <h3 className="font-bold text-base text-[#0f392b]">Verify Volunteer Handoff</h3>
+              </div>
+              <button
+                onClick={() => setVerifyingDonation(null)}
+                className="text-gray-400 hover:text-gray-600 text-sm font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-gray-600">
+              The NGO volunteer has arrived for <strong>"{verifyingDonation.title}"</strong>. Enter the 6-digit confirmation OTP shown on their pass.
+            </p>
+
+            <form onSubmit={handleVerifyOtp} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">
+                  6-Digit Handoff OTP *
+                </label>
+                <input
+                  type="text"
+                  required
+                  maxLength="6"
+                  placeholder="e.g. 749210"
+                  value={enteredOtp}
+                  onChange={(e) => setEnteredOtp(e.target.value)}
+                  className="w-full text-center text-2xl font-black tracking-widest px-4 py-3 rounded-2xl border border-gray-300 focus:border-[#84cc16] focus:outline-none"
+                />
+              </div>
+
+              <div className="p-3 rounded-xl bg-gray-50 text-[11px] text-gray-500 space-y-1">
+                <div>• Donor Pickup Reference: <strong>{verifyingDonation.verificationCode}</strong></div>
+                <div>• Recipient: <strong>{verifyingDonation.claimedBy}</strong></div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setVerifyingDonation(null)}
+                  className="flex-1 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-600"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 rounded-xl bg-[#0f392b] text-white text-xs font-bold hover:bg-[#164e3b]"
+                >
+                  Confirm Handoff
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+};
+
+export default DonorDashboard;
