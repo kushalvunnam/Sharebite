@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext';
 import Navbar from './components/common/Navbar';
 import Footer from './components/common/Footer';
@@ -24,6 +24,27 @@ const ScrollToTop = () => {
     window.scrollTo(0, 0);
   }, [pathname]);
   return null;
+};
+
+// Route protection component: guards private routes from unauthenticated users
+const ProtectedRoute = ({ children, allowedRoles }) => {
+  const { currentUser } = useApp();
+  const location = useLocation();
+
+  if (!currentUser) {
+    // Preserve the attempted URL in location.state.from so login can redirect back
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // If user role does not match allowed roles for this route, redirect to their role dashboard
+  if (allowedRoles && allowedRoles.length > 0 && !allowedRoles.includes(currentUser.role)) {
+    if (currentUser.role === 'donor') return <Navigate to="/donor-dashboard" replace />;
+    if (currentUser.role === 'recipient') return <Navigate to="/recipient-dashboard" replace />;
+    if (currentUser.role === 'admin') return <Navigate to="/admin" replace />;
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
 };
 
 // Global Toast Banner
@@ -58,16 +79,48 @@ const MainLayout = () => {
       
       <main className="flex-1">
         <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/explore" element={<ExploreDonationsPage />} />
-          <Route path="/donor-dashboard" element={<DonorDashboard />} />
-          <Route path="/recipient-dashboard" element={<RecipientDashboard />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/impact" element={<ImpactPage />} />
-          <Route path="/safety" element={<SafetyGuidelinesPage />} />
+          {/* Default entry route: / redirects immediately to /login */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
+
+          {/* Landing / Home marketing pages */}
+          <Route path="/home" element={<LandingPage />} />
+          <Route path="/landing" element={<LandingPage />} />
+
+          {/* Public authentication and exploration routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="*" element={<LandingPage />} />
+          <Route path="/explore" element={<ExploreDonationsPage />} />
+          <Route path="/impact" element={<ImpactPage />} />
+          <Route path="/safety" element={<SafetyGuidelinesPage />} />
+
+          {/* Protected dashboard routes */}
+          <Route
+            path="/donor-dashboard"
+            element={
+              <ProtectedRoute allowedRoles={['donor']}>
+                <DonorDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/recipient-dashboard"
+            element={
+              <ProtectedRoute allowedRoles={['recipient']}>
+                <RecipientDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Catch-all route */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </main>
 

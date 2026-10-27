@@ -13,6 +13,8 @@ import {
   HeartHandshake,
   Utensils,
   LogOut,
+  LogIn,
+  Zap,
   RefreshCw
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
@@ -22,6 +24,7 @@ export const Navbar = () => {
   const { 
     currentUser, 
     switchRole, 
+    logout,
     notifications, 
     setIsNotificationOpen, 
     availableListingsCount,
@@ -42,6 +45,10 @@ export const Navbar = () => {
   const isActive = (path) => location.pathname === path;
 
   const handlePostClick = () => {
+    if (!currentUser) {
+      navigate('/login', { state: { from: { pathname: '/donor-dashboard' } } });
+      return;
+    }
     if (currentUser?.role === 'donor') {
       setIsPostWizardOpen(true);
     } else {
@@ -50,11 +57,15 @@ export const Navbar = () => {
     }
   };
 
+  const logoTarget = currentUser 
+    ? (currentUser.role === 'recipient' ? '/recipient-dashboard' : currentUser.role === 'admin' ? '/admin' : '/donor-dashboard')
+    : '/login';
+
   return (
     <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-white/85 border-b border-[#0f392b]/10 transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
         {/* Left: Brand Logo */}
-        <Logo />
+        <Logo linkTo={logoTarget} />
 
         {/* Center: Desktop Navigation Links */}
         <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
@@ -176,120 +187,228 @@ export const Navbar = () => {
             )}
           </button>
 
-          {/* Role Switcher Pill (Crucial for Instant Hackathon Testing) */}
-          <div className="relative">
-            <button
-              onClick={() => setRoleDropdownOpen(!roleDropdownOpen)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-gray-200 bg-white hover:border-[#84cc16] shadow-xs transition-all text-xs font-semibold text-gray-800"
-            >
-              <div className="w-6 h-6 rounded-lg overflow-hidden border border-gray-200 shrink-0">
-                <img
-                  src={currentUser?.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80"}
-                  alt={currentUser?.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="hidden sm:flex flex-col text-left">
-                <span className="text-[11px] font-bold text-[#0f392b] leading-tight flex items-center gap-1">
-                  {currentUser?.name?.split(' ')[0]}
-                  <span className={`px-1.5 py-0.2 rounded text-[9px] uppercase font-extrabold ${
-                    currentUser?.role === 'donor' 
-                      ? 'bg-emerald-100 text-[#0f392b]' 
-                      : currentUser?.role === 'recipient'
-                      ? 'bg-amber-100 text-amber-800'
-                      : 'bg-purple-100 text-purple-800'
-                  }`}>
-                    {currentUser?.role}
-                  </span>
-                </span>
-                <span className="text-[10px] text-gray-500 truncate max-w-[110px]">
-                  {currentUser?.organization}
-                </span>
-              </div>
-              <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
-            </button>
-
-            {/* Role Switcher Menu */}
-            {roleDropdownOpen && (
-              <div 
-                className="absolute right-0 mt-2 w-64 rounded-2xl bg-white shadow-2xl border border-gray-100 p-2 z-50 animate-in fade-in slide-in-from-top-2"
-                onClick={() => setRoleDropdownOpen(false)}
+          {/* Role Switcher Pill or Sign In Button */}
+          {!currentUser ? (
+            <div className="flex items-center gap-2">
+              <Link
+                to="/login"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#0f392b] hover:bg-[#164e3b] text-white text-xs font-bold shadow-xs transition-all hover:scale-102"
               >
-                <div className="px-3 py-2 border-b border-gray-100 mb-1">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
-                    Switch Demo Account
-                  </div>
-                  <div className="text-xs text-gray-600 mt-0.5">
-                    1-Click Hackathon Role Switching
-                  </div>
-                </div>
-
-                {/* Donor Role */}
+                <LogIn className="w-3.5 h-3.5 text-[#84cc16]" />
+                <span>Sign In</span>
+              </Link>
+              <div className="relative">
                 <button
-                  onClick={() => { switchRole('donor'); navigate('/donor-dashboard'); }}
-                  className={`w-full flex items-center gap-2.5 p-2 rounded-xl text-left transition-all ${
-                    currentUser?.role === 'donor' ? 'bg-[#84cc16]/20 font-bold' : 'hover:bg-gray-50'
-                  }`}
+                  onClick={() => setRoleDropdownOpen(!roleDropdownOpen)}
+                  title="Quick Demo Role Login"
+                  className="flex items-center gap-1 px-2.5 py-2 rounded-xl border border-gray-200 bg-white hover:border-[#84cc16] shadow-xs text-xs font-semibold text-gray-700 transition-all"
                 >
-                  <div className="p-1.5 rounded-lg bg-[#0f392b] text-[#84cc16]">
-                    <Utensils className="w-4 h-4" />
-                  </div>
-                  <div className="text-xs">
-                    <div className="font-bold text-gray-900">Chef Marco (Donor)</div>
-                    <div className="text-[10px] text-gray-500">Verde Artisan Trattoria</div>
-                  </div>
+                  <Zap className="w-3.5 h-3.5 text-[#84cc16]" />
+                  <span className="hidden sm:inline text-[11px] font-bold">Demo</span>
+                  <ChevronDown className="w-3 h-3 text-gray-400" />
                 </button>
 
-                {/* Recipient NGO Role */}
-                <button
-                  onClick={() => { switchRole('recipient'); navigate('/recipient-dashboard'); }}
-                  className={`w-full flex items-center gap-2.5 p-2 rounded-xl text-left transition-all ${
-                    currentUser?.role === 'recipient' ? 'bg-amber-50 font-bold' : 'hover:bg-gray-50'
-                  }`}
-                >
-                  <div className="p-1.5 rounded-lg bg-[#f97316] text-white">
-                    <HeartHandshake className="w-4 h-4" />
-                  </div>
-                  <div className="text-xs">
-                    <div className="font-bold text-gray-900">Sarah Lin (Recipient NGO)</div>
-                    <div className="text-[10px] text-gray-500">Eastside Hope Shelter</div>
-                  </div>
-                </button>
-
-                {/* Admin Role */}
-                <button
-                  onClick={() => { switchRole('admin'); navigate('/admin'); }}
-                  className={`w-full flex items-center gap-2.5 p-2 rounded-xl text-left transition-all ${
-                    currentUser?.role === 'admin' ? 'bg-purple-50 font-bold' : 'hover:bg-gray-50'
-                  }`}
-                >
-                  <div className="p-1.5 rounded-lg bg-gray-900 text-white">
-                    <ShieldCheck className="w-4 h-4" />
-                  </div>
-                  <div className="text-xs">
-                    <div className="font-bold text-gray-900">David Vance (Admin)</div>
-                    <div className="text-[10px] text-gray-500">Safety & Compliance Ops</div>
-                  </div>
-                </button>
-
-                <div className="mt-2 pt-2 border-t border-gray-100 flex items-center justify-between px-2 text-[11px]">
-                  <button
-                    onClick={resetDemoData}
-                    className="flex items-center gap-1 text-gray-500 hover:text-[#0f392b] font-medium"
-                    title="Reset all demo data to default"
+                {roleDropdownOpen && (
+                  <div 
+                    className="absolute right-0 mt-2 w-64 rounded-2xl bg-white shadow-2xl border border-gray-100 p-2 z-50 animate-in fade-in slide-in-from-top-2"
+                    onClick={() => setRoleDropdownOpen(false)}
                   >
-                    <RefreshCw className="w-3 h-3" /> Reset Demo
-                  </button>
-                  <Link
-                    to="/login"
-                    className="text-[#0f392b] font-bold hover:underline"
-                  >
-                    Custom Login
-                  </Link>
-                </div>
+                    <div className="px-3 py-2 border-b border-gray-100 mb-1">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                        Instant Demo Login
+                      </div>
+                      <div className="text-xs text-gray-600 mt-0.5">
+                        1-Click Hackathon Role Switching
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => { switchRole('donor'); navigate('/donor-dashboard'); }}
+                      className="w-full flex items-center gap-2.5 p-2 rounded-xl text-left hover:bg-gray-50 transition-all"
+                    >
+                      <div className="p-1.5 rounded-lg bg-[#0f392b] text-[#84cc16]">
+                        <Utensils className="w-4 h-4" />
+                      </div>
+                      <div className="text-xs">
+                        <div className="font-bold text-gray-900">Chef Marco (Donor)</div>
+                        <div className="text-[10px] text-gray-500">Verde Artisan Trattoria</div>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => { switchRole('recipient'); navigate('/recipient-dashboard'); }}
+                      className="w-full flex items-center gap-2.5 p-2 rounded-xl text-left hover:bg-gray-50 transition-all"
+                    >
+                      <div className="p-1.5 rounded-lg bg-[#f97316] text-white">
+                        <HeartHandshake className="w-4 h-4" />
+                      </div>
+                      <div className="text-xs">
+                        <div className="font-bold text-gray-900">Sarah Lin (Recipient NGO)</div>
+                        <div className="text-[10px] text-gray-500">Eastside Hope Shelter</div>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => { switchRole('admin'); navigate('/admin'); }}
+                      className="w-full flex items-center gap-2.5 p-2 rounded-xl text-left hover:bg-gray-50 transition-all"
+                    >
+                      <div className="p-1.5 rounded-lg bg-gray-900 text-white">
+                        <ShieldCheck className="w-4 h-4" />
+                      </div>
+                      <div className="text-xs">
+                        <div className="font-bold text-gray-900">David Vance (Admin)</div>
+                        <div className="text-[10px] text-gray-500">Safety & Compliance Ops</div>
+                      </div>
+                    </button>
+
+                    <div className="mt-2 pt-2 border-t border-gray-100 flex items-center justify-between px-2 text-[11px]">
+                      <button
+                        onClick={resetDemoData}
+                        className="flex items-center gap-1 text-gray-500 hover:text-[#0f392b] font-medium"
+                        title="Reset all demo data to default"
+                      >
+                        <RefreshCw className="w-3 h-3" /> Reset Demo
+                      </button>
+                      <Link
+                        to="/login"
+                        className="text-[#0f392b] font-bold hover:underline"
+                      >
+                        Custom Login
+                      </Link>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="relative">
+              <button
+                onClick={() => setRoleDropdownOpen(!roleDropdownOpen)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-gray-200 bg-white hover:border-[#84cc16] shadow-xs transition-all text-xs font-semibold text-gray-800"
+              >
+                <div className="w-6 h-6 rounded-lg overflow-hidden border border-gray-200 shrink-0">
+                  <img
+                    src={currentUser?.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80"}
+                    alt={currentUser?.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="hidden sm:flex flex-col text-left">
+                  <span className="text-[11px] font-bold text-[#0f392b] leading-tight flex items-center gap-1">
+                    {currentUser?.name?.split(' ')[0]}
+                    <span className={`px-1.5 py-0.2 rounded text-[9px] uppercase font-extrabold ${
+                      currentUser?.role === 'donor' 
+                        ? 'bg-emerald-100 text-[#0f392b]' 
+                        : currentUser?.role === 'recipient'
+                        ? 'bg-amber-100 text-amber-800'
+                        : 'bg-purple-100 text-purple-800'
+                    }`}>
+                      {currentUser?.role}
+                    </span>
+                  </span>
+                  <span className="text-[10px] text-gray-500 truncate max-w-[110px]">
+                    {currentUser?.organization}
+                  </span>
+                </div>
+                <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
+              </button>
+
+              {/* Role Switcher Menu */}
+              {roleDropdownOpen && (
+                <div 
+                  className="absolute right-0 mt-2 w-64 rounded-2xl bg-white shadow-2xl border border-gray-100 p-2 z-50 animate-in fade-in slide-in-from-top-2"
+                  onClick={() => setRoleDropdownOpen(false)}
+                >
+                  <div className="px-3 py-2 border-b border-gray-100 mb-1">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                      Switch Demo Account
+                    </div>
+                    <div className="text-xs text-gray-600 mt-0.5">
+                      1-Click Hackathon Role Switching
+                    </div>
+                  </div>
+
+                  {/* Donor Role */}
+                  <button
+                    onClick={() => { switchRole('donor'); navigate('/donor-dashboard'); }}
+                    className={`w-full flex items-center gap-2.5 p-2 rounded-xl text-left transition-all ${
+                      currentUser?.role === 'donor' ? 'bg-[#84cc16]/20 font-bold' : 'hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="p-1.5 rounded-lg bg-[#0f392b] text-[#84cc16]">
+                      <Utensils className="w-4 h-4" />
+                    </div>
+                    <div className="text-xs">
+                      <div className="font-bold text-gray-900">Chef Marco (Donor)</div>
+                      <div className="text-[10px] text-gray-500">Verde Artisan Trattoria</div>
+                    </div>
+                  </button>
+
+                  {/* Recipient NGO Role */}
+                  <button
+                    onClick={() => { switchRole('recipient'); navigate('/recipient-dashboard'); }}
+                    className={`w-full flex items-center gap-2.5 p-2 rounded-xl text-left transition-all ${
+                      currentUser?.role === 'recipient' ? 'bg-amber-50 font-bold' : 'hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="p-1.5 rounded-lg bg-[#f97316] text-white">
+                      <HeartHandshake className="w-4 h-4" />
+                    </div>
+                    <div className="text-xs">
+                      <div className="font-bold text-gray-900">Sarah Lin (Recipient NGO)</div>
+                      <div className="text-[10px] text-gray-500">Eastside Hope Shelter</div>
+                    </div>
+                  </button>
+
+                  {/* Admin Role */}
+                  <button
+                    onClick={() => { switchRole('admin'); navigate('/admin'); }}
+                    className={`w-full flex items-center gap-2.5 p-2 rounded-xl text-left transition-all ${
+                      currentUser?.role === 'admin' ? 'bg-purple-50 font-bold' : 'hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="p-1.5 rounded-lg bg-gray-900 text-white">
+                      <ShieldCheck className="w-4 h-4" />
+                    </div>
+                    <div className="text-xs">
+                      <div className="font-bold text-gray-900">David Vance (Admin)</div>
+                      <div className="text-[10px] text-gray-500">Safety & Compliance Ops</div>
+                    </div>
+                  </button>
+
+                  {/* Sign Out Action */}
+                  <div className="mt-2 pt-2 border-t border-gray-100 flex flex-col gap-1 px-1">
+                    <button
+                      onClick={() => {
+                        logout();
+                        navigate('/login');
+                      }}
+                      className="w-full flex items-center gap-2 p-2 rounded-xl text-left text-xs font-bold text-rose-600 hover:bg-rose-50 transition-all cursor-pointer"
+                    >
+                      <LogOut className="w-3.5 h-3.5 text-rose-500" />
+                      <span>Sign Out Session</span>
+                    </button>
+
+                    <div className="flex items-center justify-between px-1 text-[11px] pt-1">
+                      <button
+                        onClick={resetDemoData}
+                        className="flex items-center gap-1 text-gray-500 hover:text-[#0f392b] font-medium"
+                        title="Reset all demo data to default"
+                      >
+                        <RefreshCw className="w-3 h-3" /> Reset Demo
+                      </button>
+                      <Link
+                        to="/login"
+                        className="text-[#0f392b] font-bold hover:underline"
+                      >
+                        Custom Login
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Primary Action Button: Donate Surplus Food */}
           <button
@@ -342,22 +461,62 @@ export const Navbar = () => {
             <ShieldCheck className="w-4 h-4 text-[#0f392b]" /> Food Safety & Legal Shield
           </Link>
 
-          <div className="pt-2 border-t border-gray-100 grid grid-cols-2 gap-2">
-            <Link
-              to="/donor-dashboard"
-              onClick={() => setMobileMenuOpen(false)}
-              className="p-2.5 rounded-xl text-center bg-[#0f392b]/10 text-[#0f392b] text-xs font-bold"
-            >
-              Donor Hub
-            </Link>
-            <Link
-              to="/recipient-dashboard"
-              onClick={() => setMobileMenuOpen(false)}
-              className="p-2.5 rounded-xl text-center bg-[#f97316]/10 text-[#f97316] text-xs font-bold"
-            >
-              NGO Hub
-            </Link>
-          </div>
+          {!currentUser ? (
+            <div className="pt-2 border-t border-gray-100 space-y-2">
+              <Link
+                to="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[#0f392b] text-white text-sm font-bold shadow-md"
+              >
+                <LogIn className="w-4 h-4 text-[#84cc16]" />
+                <span>Sign In to ShareBite</span>
+              </Link>
+            </div>
+          ) : (
+            <>
+              <div className="pt-2 border-t border-gray-100 grid grid-cols-2 gap-2">
+                <Link
+                  to="/donor-dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-2.5 rounded-xl text-center bg-[#0f392b]/10 text-[#0f392b] text-xs font-bold"
+                >
+                  Donor Hub
+                </Link>
+                <Link
+                  to="/recipient-dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-2.5 rounded-xl text-center bg-[#f97316]/10 text-[#f97316] text-xs font-bold"
+                >
+                  NGO Hub
+                </Link>
+              </div>
+
+              <div className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 border border-gray-100">
+                <div className="flex items-center gap-2">
+                  <img
+                    src={currentUser.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80"}
+                    alt={currentUser.name}
+                    className="w-8 h-8 rounded-xl object-cover"
+                  />
+                  <div className="text-xs">
+                    <div className="font-bold text-[#0f392b]">{currentUser.name}</div>
+                    <div className="text-[10px] text-gray-500 uppercase font-extrabold">{currentUser.role}</div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    logout();
+                    navigate('/login');
+                  }}
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-rose-600 bg-rose-50 text-xs font-bold"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Logout</span>
+                </button>
+              </div>
+            </>
+          )}
 
           <button
             onClick={() => { setMobileMenuOpen(false); handlePostClick(); }}

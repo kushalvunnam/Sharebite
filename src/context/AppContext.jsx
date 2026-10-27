@@ -71,13 +71,17 @@ export const AppProvider = ({ children }) => {
     }
   });
 
-  // Current active user
+  // Current active user - null by default for unauthenticated sessions
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       const savedUser = localStorage.getItem('sharebite_user');
-      return savedUser ? JSON.parse(savedUser) : DEMO_USERS.donor;
+      if (savedUser && savedUser !== 'null') {
+        const parsed = JSON.parse(savedUser);
+        return (parsed && parsed.id) ? parsed : null;
+      }
+      return null;
     } catch {
-      return DEMO_USERS.donor;
+      return null;
     }
   });
 
@@ -113,7 +117,11 @@ export const AppProvider = ({ children }) => {
   }, [donations]);
 
   useEffect(() => {
-    localStorage.setItem('sharebite_user', JSON.stringify(currentUser));
+    if (currentUser) {
+      localStorage.setItem('sharebite_user', JSON.stringify(currentUser));
+    } else {
+      localStorage.removeItem('sharebite_user');
+    }
   }, [currentUser]);
 
   useEffect(() => {
@@ -289,8 +297,14 @@ export const AppProvider = ({ children }) => {
   };
 
   const logout = () => {
-    api.auth.logout();
+    try {
+      api.auth.logout();
+    } catch {
+      // ignore
+    }
     setCurrentUser(null);
+    localStorage.removeItem('sharebite_user');
+    localStorage.removeItem('sharebite_token');
     showToast('Logged out successfully', 'info');
   };
 
