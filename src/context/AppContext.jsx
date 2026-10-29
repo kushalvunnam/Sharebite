@@ -9,39 +9,39 @@ const AppContext = createContext();
 
 export const DEMO_USERS = {
   donor: {
-    id: "donor-1",
-    name: "Chef Marco Rossi",
-    email: "marco@verdeosteria.com",
+    id: "donor-kushal",
+    name: "Kushal",
+    email: "kushal@hotelparadise.com",
     role: "donor",
-    organization: "Verde Artisan Osteria",
-    orgType: "Restaurant & Trattoria",
-    address: "412 Mulberry St, Downtown",
-    avatar: "https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&w=300&q=80",
-    verified: false,
-    safetyLicense: "Not verified",
+    organization: "Hotel Paradise",
+    orgType: "Fine Dining & Hospitality",
+    address: "Banjara Hills, Hyderabad, Telangana",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
+    verified: true,
+    safetyLicense: "FSSAI-HYD-9812",
   },
   recipient: {
-    id: "recip-1",
-    name: "Sarah Lin",
-    email: "sarah@eastsidehope.org",
+    id: "recip-care",
+    name: "NGO Care Foundation",
+    email: "care@ngofoundation.org",
     role: "recipient",
-    organization: "Eastside Hope Food Rescue & Shelter",
-    orgType: "Emergency Shelter & Soup Kitchen",
-    address: "320 Oak Ridge Rd, East District",
+    organization: "NGO Care Foundation",
+    orgType: "Community Food Relief & Shelter",
+    address: "Banjara Hills, Hyderabad, Telangana",
     avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80",
-    verified: false,
-    taxId: "Not verified",
+    verified: true,
+    taxId: "80G-HYD-5120",
   },
   admin: {
     id: "admin-1",
     name: "David Vance",
     email: "david.safety@sharebite.org",
     role: "admin",
-    organization: "ShareBite Operations & Food Safety Board",
+    organization: "ShareBite Operations & Safety Board",
     orgType: "Platform Oversight",
-    address: "ShareBite HQ, Innovation Way",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
-    verified: false,
+    address: "ShareBite Global Hub, Innovation Way",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80",
+    verified: true,
   }
 };
 
@@ -51,16 +51,13 @@ export const AppProvider = ({ children }) => {
   const [apiHealth, setApiHealth] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Load donations from localStorage or fallback
+  // Load donations from localStorage or fallback to reference items
   const [donations, setDonations] = useState(() => {
     try {
-      const saved = localStorage.getItem('sharebite_donations');
+      const saved = localStorage.getItem('sharebite_donations_v2');
       if (saved) {
         const parsed = JSON.parse(saved);
-        const sanitized = Array.isArray(parsed)
-          ? parsed.filter(d => !['DON-101', 'DON-102', 'DON-103', 'DON-104', 'DON-105', 'DON-106'].includes(d.id))
-          : [];
-        return sanitized;
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
       return INITIAL_DONATIONS;
     } catch {
@@ -107,7 +104,7 @@ export const AppProvider = ({ children }) => {
 
   // Sync to local storage
   useEffect(() => {
-    localStorage.setItem('sharebite_donations', JSON.stringify(donations));
+    localStorage.setItem('sharebite_donations_v2', JSON.stringify(donations));
   }, [donations]);
 
   useEffect(() => {

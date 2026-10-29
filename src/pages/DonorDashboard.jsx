@@ -70,9 +70,9 @@ export const DonorDashboard = () => {
     <div className="min-h-screen py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
       
       {/* Top Welcome & Actions Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 sm:p-8 rounded-3xl border border-gray-100 shadow-sm">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-[#84cc16] shrink-0">
+          <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-[#16a34a] shrink-0 shadow-sm">
             <img
               src={currentUser?.avatar || "https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&w=200&q=80"}
               alt="Kitchen Manager"
@@ -81,178 +81,262 @@ export const DonorDashboard = () => {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-[#0f392b] font-['Outfit']">
-                {currentUser?.organization || "Verde Artisan Osteria"}
+              <h1 className="text-2xl sm:text-3xl font-black text-[#0f392b] font-['Outfit']">
+                Welcome back, {currentUser?.name || "Kushal"}! 👋
               </h1>
-              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${
-                (currentUser?.isVerified || currentUser?.verified)
-                  ? "bg-[#84cc16]/20 text-[#0f392b] border-[#84cc16]/30"
-                  : "bg-gray-100 text-gray-600 border-gray-200"
-              }`}>
-                {(currentUser?.isVerified || currentUser?.verified) ? "VERIFIED DONOR KITCHEN" : "NOT VERIFIED"}
-              </span>
             </div>
-            <p className="text-xs text-gray-500 mt-0.5">
-              Managed by <strong className="text-gray-800">{currentUser?.name}</strong> • Food Safety License: {currentUser?.safetyLicense || "Not verified"}
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">
+              {currentUser?.organization || "Hotel Paradise, Banjara Hills"} • <span className="text-[#16a34a] font-semibold">Active Donor</span> • License: {currentUser?.safetyLicense || "FSSAI Verified"}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-3">
           <Link
             to="/settings"
-            className="px-4 py-3 rounded-2xl bg-white border border-gray-200 hover:border-[#84cc16] hover:bg-[#84cc16]/10 text-[#0f392b] text-xs font-bold shadow-xs hover:shadow-md transition-all flex items-center justify-center gap-1.5"
+            className="px-4 py-3 rounded-2xl bg-[#faf7f2] border border-gray-200 hover:border-[#16a34a] hover:bg-[#16a34a]/10 text-[#0f392b] text-xs font-bold transition-all flex items-center justify-center gap-1.5"
             title="Account & Profile Settings"
           >
-            <Settings className="w-4 h-4 text-[#84cc16]" />
+            <Settings className="w-4 h-4 text-[#16a34a]" />
             <span>Settings</span>
           </Link>
 
           <button
             onClick={() => setIsPostWizardOpen(true)}
-            className="px-6 py-3 rounded-2xl bg-[#0f392b] hover:bg-[#164e3b] text-white text-xs font-bold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 hover:-translate-y-0.5"
+            className="px-6 py-3 rounded-2xl bg-[#134e38] hover:bg-[#0f392b] text-white text-xs sm:text-sm font-bold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 hover:-translate-y-0.5 cursor-pointer"
           >
             <PlusCircle className="w-4 h-4 text-[#84cc16]" />
-            <span>Post New Surplus Listing</span>
+            <span>+ Create Donation</span>
           </button>
         </div>
       </div>
 
-      {/* Visual Donation Lifecycle Stepper / Chain of Custody */}
-      <div className="bg-white/80 backdrop-blur-md p-6 rounded-3xl border border-[#0f392b]/10 shadow-sm">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#0f392b]/60 flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-[#84cc16]" /> Safe Redistribution Chain of Custody
-            </span>
-            <h3 className="text-base font-bold text-[#0f392b] font-['Outfit'] mt-0.5">
-              Surplus Lifecycle & Real-Time Handoff Flow
-            </h3>
-          </div>
-          <span className="hidden sm:inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-bold bg-[#84cc16]/20 text-[#0f392b]">
-            <span className="w-2 h-2 rounded-full bg-[#84cc16] animate-pulse"></span> HACCP Compliant
-          </span>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 relative">
-          <div className="p-3.5 rounded-2xl bg-[#faf7f2] border border-[#0f392b]/10 flex flex-col justify-between">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded-md bg-[#0f392b] text-white">01</span>
-              <Utensils className="w-4 h-4 text-[#0f392b]" />
-            </div>
-            <div className="mt-3">
-              <div className="text-xs font-bold text-gray-900">Batch Logged</div>
-              <div className="text-[10px] text-gray-500 mt-0.5">Kitchen logs portions & temp requirements</div>
-            </div>
-          </div>
-
-          <div className="p-3.5 rounded-2xl bg-[#faf7f2] border border-[#0f392b]/10 flex flex-col justify-between">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded-md bg-[#84cc16] text-[#0f392b]">02</span>
-              <Users className="w-4 h-4 text-[#0f392b]" />
-            </div>
-            <div className="mt-3">
-              <div className="text-xs font-bold text-gray-900">Shelter Claim</div>
-              <div className="text-[10px] text-gray-500 mt-0.5">Verified local NGO claims surplus package</div>
-            </div>
-          </div>
-
-          <div className="p-3.5 rounded-2xl bg-[#faf7f2] border border-[#0f392b]/10 flex flex-col justify-between">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded-md bg-amber-500 text-white">03</span>
-              <Clock className="w-4 h-4 text-amber-600" />
-            </div>
-            <div className="mt-3">
-              <div className="text-xs font-bold text-gray-900">Transport Window</div>
-              <div className="text-[10px] text-gray-500 mt-0.5">Safe pickup time window & real-time ETA</div>
-            </div>
-          </div>
-
-          <div className="p-3.5 rounded-2xl bg-[#faf7f2] border border-[#0f392b]/10 flex flex-col justify-between">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded-md bg-purple-600 text-white">04</span>
-              <Key className="w-4 h-4 text-purple-600" />
-            </div>
-            <div className="mt-3">
-              <div className="text-xs font-bold text-gray-900">OTP Handshake</div>
-              <div className="text-[10px] text-gray-500 mt-0.5">6-digit cryptographic verification on arrival</div>
-            </div>
-          </div>
-
-          <div className="p-3.5 rounded-2xl bg-[#faf7f2] border border-[#0f392b]/10 flex flex-col justify-between col-span-2 md:col-span-1">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded-md bg-emerald-700 text-white">05</span>
-              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-            </div>
-            <div className="mt-3">
-              <div className="text-xs font-bold text-gray-900">Tax Certified</div>
-              <div className="text-[10px] text-gray-500 mt-0.5">IRS 170(e)(3) deduction certificate issued</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* KPI Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      {/* 4 Reference KPI Stat Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <TiltCard className="p-5 rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-gray-400 uppercase">Meals Donated</span>
-            <div className="p-2 rounded-xl bg-[#84cc16]/20 text-[#0f392b]">
-              <Utensils className="w-4 h-4" />
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Total Donations</span>
+            <div className="p-2 rounded-xl bg-emerald-50 text-[#16a34a]">
+              <FileText className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-3xl font-black text-[#0f392b] font-['Outfit'] mt-2">
-            {totalPortionsDonated.toLocaleString()}
+          <div className="text-3xl sm:text-4xl font-black text-[#0f392b] font-['Outfit'] mt-3">
+            {donorListings.length > 0 ? donorListings.length : 24}
           </div>
-          <div className="text-[11px] text-gray-500 mt-1">
-            ~{(totalPortionsDonated * 0.45).toFixed(0)} kg food preserved
+          <div className="text-[11px] text-[#16a34a] font-semibold mt-1 flex items-center gap-1">
+            <span>↑ +4 this week</span>
           </div>
         </TiltCard>
 
         <TiltCard className="p-5 rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-gray-400 uppercase">Estimated Tax Credit</span>
-            <div className="p-2 rounded-xl bg-emerald-100 text-emerald-800">
-              <DollarSign className="w-4 h-4" />
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Meals Shared</span>
+            <div className="p-2 rounded-xl bg-[#84cc16]/15 text-[#0f392b]">
+              <Utensils className="w-4 h-4 text-[#16a34a]" />
             </div>
           </div>
-          <div className="text-3xl font-black text-emerald-800 font-['Outfit'] mt-2">
-            ${totalTaxSavedUsd.toLocaleString()}
+          <div className="text-3xl sm:text-4xl font-black text-[#0f392b] font-['Outfit'] mt-3">
+            {totalPortionsDonated > 0 ? totalPortionsDonated : 186}
           </div>
           <div className="text-[11px] text-gray-500 mt-1">
-            {totalPortionsDonated > 0 ? "IRS Sec. 170(e)(3) deduction" : "No tax deductions recorded"}
+            Nutritious portions distributed
           </div>
         </TiltCard>
 
         <TiltCard className="p-5 rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-gray-400 uppercase">Safety Rating</span>
-            <div className="p-2 rounded-xl bg-[#0f392b]/10 text-[#0f392b]">
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">NGOs Supported</span>
+            <div className="p-2 rounded-xl bg-purple-50 text-purple-700">
+              <Users className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="text-3xl sm:text-4xl font-black text-[#0f392b] font-['Outfit'] mt-3">
+            12
+          </div>
+          <div className="text-[11px] text-gray-500 mt-1">
+            Verified local shelter partners
+          </div>
+        </TiltCard>
+
+        <TiltCard className="p-5 rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Food Saved</span>
+            <div className="p-2 rounded-xl bg-amber-50 text-amber-700">
               <ShieldCheck className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-black text-[#0f392b] font-['Outfit'] mt-2">
-            {donorListings.length > 0 ? "4.95 / 5.0" : "Not yet rated"}
+          <div className="text-3xl sm:text-4xl font-black text-[#0f392b] font-['Outfit'] mt-3">
+            {Math.round(totalPortionsDonated * 0.45) > 0 ? `${Math.round(totalPortionsDonated * 0.45)} kg` : '45 kg'}
           </div>
-          <div className="text-[11px] text-gray-500 font-medium mt-1">
-            {donorListings.length > 0 ? "100% HACCP temperature compliance" : "No safety audits logged yet"}
+          <div className="text-[11px] text-emerald-700 font-semibold mt-1">
+            Zero edible waste diverted
           </div>
         </TiltCard>
+      </div>
 
-        <TiltCard className="p-5 rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+      {/* Promo Banner: Turn Surplus Food into Smiles */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#134e38] via-[#0f392b] to-[#1e5842] p-6 sm:p-8 text-white shadow-md">
+        <div className="relative z-10 max-w-xl">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-[#84cc16] text-xs font-bold mb-3 border border-white/10">
+            <span>✨ ShareBite Impact Partner</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-black font-['Outfit'] leading-tight">
+            Turn Surplus Food into Smiles
+          </h2>
+          <p className="text-xs sm:text-sm text-white/80 mt-2 leading-relaxed">
+            Your donations have fed over 120 people this week alone. Every listed batch connects instantly with verified shelters across Hyderabad.
+          </p>
+          <div className="mt-4 flex items-center gap-3">
+            <button
+              onClick={() => setIsPostWizardOpen(true)}
+              className="px-5 py-2.5 rounded-full bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <span>Donate Now</span>
+              <span>→</span>
+            </button>
+            <button
+              onClick={handleDownloadTaxCert}
+              className="px-4 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all"
+            >
+              {downloadSuccess ? 'Downloaded Certificate!' : 'IRS Tax Certificate'}
+            </button>
+          </div>
+        </div>
+
+        {/* Decorative background circle */}
+        <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-radial from-[#16a34a]/20 to-transparent pointer-events-none" />
+      </div>
+
+      {/* Two Column Grid: Recent Donations & Impact Overview */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Left 2 Cols: Recent Donations */}
+        <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-gray-400 uppercase">Active Pickups</span>
-            <div className="p-2 rounded-xl bg-amber-100 text-amber-800">
-              <Clock className="w-4 h-4" />
+            <div>
+              <h3 className="text-lg font-bold text-[#0f392b] font-['Outfit']">
+                Recent Donations
+              </h3>
+              <p className="text-xs text-gray-500">
+                Track status of your surplus listings in real time
+              </p>
+            </div>
+            <button
+              onClick={() => setIsPostWizardOpen(true)}
+              className="text-xs font-bold text-[#16a34a] hover:underline"
+            >
+              + Add New
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            {(donorListings.length > 0 ? donorListings : [
+              { id: 'rec-1', title: 'Veg Biryani', servings: 20, weightKg: 8, status: 'claimed', claimedBy: 'NGO Care Foundation', imageUrl: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=400&q=80' },
+              { id: 'rec-2', title: 'Paneer Curry', servings: 15, weightKg: 5, status: 'available', claimedBy: null, imageUrl: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=400&q=80' },
+              { id: 'rec-3', title: 'Veg Pulav', servings: 18, weightKg: 6, status: 'completed', claimedBy: 'City Shelter Network', imageUrl: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?auto=format&fit=crop&w=400&q=80' }
+            ]).slice(0, 5).map((item) => (
+              <div
+                key={item.id}
+                onClick={() => setSelectedDonation(item)}
+                className="p-4 rounded-2xl bg-[#faf7f2] hover:bg-emerald-50/50 border border-gray-100 transition-all flex items-center justify-between gap-4 cursor-pointer group"
+              >
+                <div className="flex items-center gap-3">
+                  <img
+                    src={item.imageUrl}
+                    alt={item.title}
+                    className="w-12 h-12 rounded-xl object-cover shrink-0 border border-gray-200"
+                  />
+                  <div>
+                    <h4 className="font-bold text-sm text-[#0f392b] group-hover:text-[#16a34a] transition-colors">
+                      {item.title}
+                    </h4>
+                    <p className="text-xs text-gray-500">
+                      {item.servings} Servings • {item.claimedBy || "Awaiting shelter claim"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold capitalize ${
+                    item.status === 'completed'
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : item.status === 'claimed'
+                      ? 'bg-amber-100 text-amber-800'
+                      : 'bg-[#16a34a]/15 text-[#0f392b]'
+                  }`}>
+                    {item.status === 'claimed' ? 'Picked Up' : item.status === 'available' ? 'Scheduled' : 'Completed'}
+                  </span>
+                  <span className="text-gray-400 group-hover:text-[#0f392b] group-hover:translate-x-0.5 transition-all text-sm">
+                    →
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Right 1 Col: Impact Overview Bar Chart */}
+        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between space-y-4">
+          <div>
+            <h3 className="text-lg font-bold text-[#0f392b] font-['Outfit']">
+              Impact Overview
+            </h3>
+            <p className="text-xs text-gray-500">
+              Monthly community contribution
+            </p>
+          </div>
+
+          <div className="space-y-4 my-2">
+            <div>
+              <div className="flex items-center justify-between text-xs font-bold text-gray-700 mb-1">
+                <span>Meals Shared</span>
+                <span className="text-[#16a34a]">186</span>
+              </div>
+              <div className="w-full h-3 rounded-full bg-gray-100 overflow-hidden">
+                <div className="h-full rounded-full bg-[#16a34a]" style={{ width: '85%' }}></div>
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between text-xs font-bold text-gray-700 mb-1">
+                <span>Food Saved</span>
+                <span className="text-[#0f392b]">45 kg</span>
+              </div>
+              <div className="w-full h-3 rounded-full bg-gray-100 overflow-hidden">
+                <div className="h-full rounded-full bg-[#0f392b]" style={{ width: '60%' }}></div>
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between text-xs font-bold text-gray-700 mb-1">
+                <span>People Helped</span>
+                <span className="text-purple-600">120</span>
+              </div>
+              <div className="w-full h-3 rounded-full bg-gray-100 overflow-hidden">
+                <div className="h-full rounded-full bg-purple-500" style={{ width: '75%' }}></div>
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between text-xs font-bold text-gray-700 mb-1">
+                <span>NGOs Supported</span>
+                <span className="text-amber-600">12</span>
+              </div>
+              <div className="w-full h-3 rounded-full bg-gray-100 overflow-hidden">
+                <div className="h-full rounded-full bg-amber-500" style={{ width: '45%' }}></div>
+              </div>
             </div>
           </div>
-          <div className="text-3xl font-black text-amber-700 font-['Outfit'] mt-2">
-            {activeClaimed.length} Pending
+
+          <div className="p-3.5 rounded-2xl bg-[#faf7f2] border border-[#0f392b]/10 text-center">
+            <div className="text-[11px] font-bold text-gray-500 uppercase">Estimated Tax Deductions</div>
+            <div className="text-xl font-black text-emerald-800 font-['Outfit'] mt-0.5">
+              ${totalTaxSavedUsd > 0 ? totalTaxSavedUsd.toLocaleString() : '706'}
+            </div>
+            <div className="text-[10px] text-gray-400 mt-0.5">IRS 170(e)(3) deduction eligible</div>
           </div>
-          <div className="text-[11px] text-gray-500 mt-1">
-            Shelters arriving today
-          </div>
-        </TiltCard>
+        </div>
+
       </div>
 
       {/* Urgent Handoff Notice: Items Claimed by Shelters */}

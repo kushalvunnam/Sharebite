@@ -27,6 +27,7 @@ export const ExploreDonationsPage = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCity, setSelectedCity] = useState('Hyderabad');
   const [selectedDietary, setSelectedDietary] = useState([]);
   const [urgencyOnly, setUrgencyOnly] = useState(false);
   const [sortBy, setSortBy] = useState('urgent');
@@ -156,24 +157,42 @@ export const ExploreDonationsPage = () => {
       <div className="bg-white p-5 rounded-3xl border border-gray-200 shadow-sm space-y-4 mb-8">
         <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
           
-          {/* Search Input */}
-          <div className="relative w-full lg:max-w-md">
-            <Search className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search by meal, kitchen name, sourdough, pasta..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-11 pr-4 py-2.5 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-[#84cc16] focus:ring-2 focus:ring-[#84cc16]/20 font-medium"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+          <div className="flex flex-col sm:flex-row gap-3 w-full lg:max-w-xl items-center">
+            {/* Location Selector Pill (matching reference Screen 3) */}
+            <div className="flex items-center gap-1.5 px-3 py-2.5 rounded-2xl bg-[#faf7f2] border border-gray-200 text-xs font-bold text-[#0f392b] shrink-0 w-full sm:w-auto">
+              <MapPin className="w-4 h-4 text-[#16a34a] shrink-0" />
+              <select
+                value={selectedCity}
+                onChange={(e) => setSelectedCity(e.target.value)}
+                className="bg-transparent text-xs font-bold text-[#0f392b] focus:outline-none cursor-pointer pr-2"
               >
-                <X className="w-4 h-4" />
-              </button>
-            )}
+                <option value="Hyderabad">📍 Hyderabad</option>
+                <option value="Banjara Hills">📍 Banjara Hills</option>
+                <option value="Jubilee Hills">📍 Jubilee Hills</option>
+                <option value="Gachibowli">📍 Gachibowli</option>
+                <option value="Secunderabad">📍 Secunderabad</option>
+              </select>
+            </div>
+
+            {/* Search Input */}
+            <div className="relative w-full flex-1">
+              <Search className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search food by name, donor, or cuisine..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-11 pr-4 py-2.5 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-[#16a34a] focus:ring-2 focus:ring-[#16a34a]/20 font-medium"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Quick Filters */}

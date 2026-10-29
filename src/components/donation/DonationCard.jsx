@@ -45,33 +45,45 @@ export const DonationCard = ({ donation, onSelect }) => {
         {/* Gradient overlay for text contrast */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
 
-        {/* Category Pill */}
-        <div className="absolute top-3 left-3">
-          <span className="px-2.5 py-1 rounded-lg text-xs font-bold tracking-wide uppercase bg-black/60 backdrop-blur-md text-white border border-white/20">
+        {/* Category & Rating Pill */}
+        <div className="absolute top-3 left-3 flex items-center gap-1.5">
+          <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-wide uppercase bg-[#134e38] text-[#84cc16] shadow-sm">
             {donation.category}
+          </span>
+          <span className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-black/60 backdrop-blur-md text-amber-300 border border-white/10">
+            ★ 4.8
           </span>
         </div>
 
-        {/* Urgency Badge */}
-        <div className="absolute top-3 right-3">
+        {/* Favorite Heart & Urgency Badge */}
+        <div className="absolute top-3 right-3 flex items-center gap-1.5">
           {isAvailable && isUrgent && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500/90 backdrop-blur-md text-white shadow-md animate-pulse">
-              <Flame className="w-3.5 h-3.5" />
-              <span>{donation.timeRemainingMins}m left</span>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-amber-500/90 text-white shadow-md animate-pulse">
+              <Flame className="w-3 h-3" />
+              <span>{donation.timeRemainingMins}m</span>
             </span>
           )}
           {isClaimed && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-[#f97316] text-white shadow-md">
-              <Clock className="w-3.5 h-3.5" />
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-[#f97316] text-white shadow-md">
+              <Clock className="w-3 h-3" />
               <span>Claimed</span>
             </span>
           )}
           {isCompleted && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-[#0f392b] text-[#84cc16] shadow-md">
-              <CheckCircle2 className="w-3.5 h-3.5" />
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-[#0f392b] text-[#84cc16] shadow-md">
+              <CheckCircle2 className="w-3 h-3" />
               <span>Preserved</span>
             </span>
           )}
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+            className="w-7 h-7 rounded-full bg-white/80 hover:bg-white text-rose-500 flex items-center justify-center backdrop-blur-md shadow-sm transition-transform hover:scale-110 cursor-pointer"
+            title="Save to favorites"
+          >
+            ♥
+          </div>
         </div>
 
         {/* Portion Count Overlay */}
@@ -139,15 +151,15 @@ export const DonationCard = ({ donation, onSelect }) => {
           </div>
 
           <button
-            className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1 transition-all ${
+            className={`px-3.5 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1 transition-all cursor-pointer ${
               isAvailable
-                ? 'bg-[#0f392b] text-white hover:bg-[#84cc16] hover:text-[#0f392b]'
+                ? 'bg-[#134e38] text-white hover:bg-[#0f392b] shadow-xs'
                 : isClaimed
                 ? 'bg-amber-100 text-amber-900'
                 : 'bg-gray-100 text-gray-500'
             }`}
           >
-            <span>{isAvailable ? 'Claim Surplus' : 'View Details'}</span>
+            <span>{isAvailable ? 'Request Now' : 'View Details'}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>

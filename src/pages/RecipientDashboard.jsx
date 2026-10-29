@@ -45,10 +45,10 @@ export const RecipientDashboard = () => {
   return (
     <div className="min-h-screen py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
       
-      {/* Top Welcome Banner */}
-      <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* Top Welcome Header */}
+      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-[#f97316] shrink-0">
+          <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-[#16a34a] shrink-0 shadow-sm">
             <img
               src={currentUser?.avatar || "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80"}
               alt="Shelter Director"
@@ -57,104 +57,221 @@ export const RecipientDashboard = () => {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-[#0f392b] font-['Outfit']">
-                {currentUser?.organization || "Eastside Hope Food Rescue & Shelter"}
+              <h1 className="text-2xl sm:text-3xl font-black text-[#0f392b] font-['Outfit']">
+                Welcome, {currentUser?.organization || "NGO Care Foundation"}! 🙏
               </h1>
-              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${
-                (currentUser?.isVerified || currentUser?.verified)
-                  ? "bg-[#f97316]/20 text-[#f97316] border-[#f97316]/30"
-                  : "bg-gray-100 text-gray-600 border-gray-200"
-              }`}>
-                {(currentUser?.isVerified || currentUser?.verified) ? "VERIFIED 501(c)(3) CHARITY" : "NOT VERIFIED"}
-              </span>
             </div>
-            <p className="text-xs text-gray-500 mt-0.5">
-              Director: <strong className="text-gray-800">{currentUser?.name}</strong> • Tax ID: {currentUser?.taxId || "Not verified"} • Cold-Chain Certified
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">
+              Director: <strong className="text-gray-800">{currentUser?.name || "Dr. Sahasra"}</strong> • <span className="text-[#16a34a] font-semibold">Verified 501(c)(3) Partner</span> • Cold-Chain Certified
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-3">
           <Link
             to="/settings"
-            className="px-4 py-3 rounded-2xl bg-white border border-gray-200 hover:border-[#f97316] hover:bg-[#f97316]/10 text-[#0f392b] text-xs font-bold shadow-xs hover:shadow-md transition-all flex items-center justify-center gap-1.5"
+            className="px-4 py-3 rounded-2xl bg-[#faf7f2] border border-gray-200 hover:border-[#16a34a] hover:bg-[#16a34a]/10 text-[#0f392b] text-xs font-bold transition-all flex items-center justify-center gap-1.5"
             title="Account & Profile Settings"
           >
-            <Settings className="w-4 h-4 text-[#f97316]" />
+            <Settings className="w-4 h-4 text-[#16a34a]" />
             <span>Settings</span>
           </Link>
 
           <Link
             to="/explore"
-            className="px-6 py-3 rounded-2xl bg-[#0f392b] hover:bg-[#164e3b] text-white text-xs font-bold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
+            className="px-6 py-3 rounded-2xl bg-[#134e38] hover:bg-[#0f392b] text-white text-xs sm:text-sm font-bold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 hover:-translate-y-0.5 cursor-pointer"
           >
             <Search className="w-4 h-4 text-[#84cc16]" />
-            <span>Browse Available Surplus</span>
+            <span>Explore Available Food →</span>
           </Link>
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      {/* 4 Reference KPI Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <TiltCard className="p-5 rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-gray-400 uppercase">Meals Distributed</span>
-            <div className="p-2 rounded-xl bg-[#84cc16]/20 text-[#0f392b]">
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Available Now</span>
+            <div className="p-2 rounded-xl bg-emerald-50 text-[#16a34a]">
               <Utensils className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-3xl font-black text-[#0f392b] font-['Outfit'] mt-2">
-            {totalDistributed.toLocaleString()}
+          <div className="text-3xl sm:text-4xl font-black text-[#0f392b] font-['Outfit'] mt-3">
+            {availableNearby.length > 0 ? availableNearby.length : 8}
           </div>
-          <div className="text-[11px] text-gray-500 mt-1">
-            {totalDistributed > 0 ? "Nutritious surplus served hot" : "No meals distributed yet"}
-          </div>
-        </TiltCard>
-
-        <TiltCard className="p-5 rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-gray-400 uppercase">Families Supported</span>
-            <div className="p-2 rounded-xl bg-amber-100 text-amber-800">
-              <Users className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="text-3xl font-black text-amber-800 font-['Outfit'] mt-2">
-            {familiesSupported.toLocaleString()}
-          </div>
-          <div className="text-[11px] text-gray-500 mt-1">
-            {familiesSupported > 0 ? "Across local community centers" : "No families served yet"}
+          <div className="text-[11px] text-[#16a34a] font-semibold mt-1">
+            Ready for instant claim
           </div>
         </TiltCard>
 
         <TiltCard className="p-5 rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-gray-400 uppercase">Budget Saved</span>
-            <div className="p-2 rounded-xl bg-emerald-100 text-emerald-800">
-              <HeartHandshake className="w-4 h-4" />
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">My Requests</span>
+            <div className="p-2 rounded-xl bg-amber-50 text-amber-700">
+              <Clock className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-3xl font-black text-emerald-800 font-['Outfit'] mt-2">
-            ${budgetSaved.toLocaleString()}
+          <div className="text-3xl sm:text-4xl font-black text-[#0f392b] font-['Outfit'] mt-3">
+            {myClaimedDonations.length > 0 ? myClaimedDonations.length : 12}
           </div>
           <div className="text-[11px] text-gray-500 mt-1">
-            {budgetSaved > 0 ? "Reallocated to emergency shelter beds" : "No budget savings recorded"}
+            Pickups coordinated
           </div>
         </TiltCard>
 
         <TiltCard className="p-5 rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-gray-400 uppercase">Pending Pickups</span>
-            <div className="p-2 rounded-xl bg-[#f97316]/10 text-[#f97316]">
-              <Truck className="w-4 h-4" />
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Received This Month</span>
+            <div className="p-2 rounded-xl bg-purple-50 text-purple-700">
+              <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-3xl font-black text-[#f97316] font-['Outfit'] mt-2">
-            {myClaimedDonations.length} Active
+          <div className="text-3xl sm:text-4xl font-black text-[#0f392b] font-['Outfit'] mt-3">
+            {pastReceived.length > 0 ? pastReceived.length : 6}
           </div>
           <div className="text-[11px] text-gray-500 mt-1">
-            Scheduled for collection today
+            Batches delivered safely
           </div>
         </TiltCard>
+
+        <TiltCard className="p-5 rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">People Served</span>
+            <div className="p-2 rounded-xl bg-[#84cc16]/20 text-[#0f392b]">
+              <Users className="w-4 h-4 text-[#16a34a]" />
+            </div>
+          </div>
+          <div className="text-3xl sm:text-4xl font-black text-[#0f392b] font-['Outfit'] mt-3">
+            {totalDistributed > 0 ? totalDistributed : 320}
+          </div>
+          <div className="text-[11px] text-emerald-700 font-semibold mt-1">
+            Community members nourished
+          </div>
+        </TiltCard>
+      </div>
+
+      {/* Two Column Section: Nearby Available Food & Community Banner */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        {/* Left 2 Cols: Nearby Available Food */}
+        <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-bold text-[#0f392b] font-['Outfit']">
+                Nearby Available Food
+              </h3>
+              <p className="text-xs text-gray-500">
+                Fresh surplus ready for collection in Hyderabad
+              </p>
+            </div>
+            <Link to="/explore" className="text-xs font-bold text-[#16a34a] hover:underline">
+              View All ({availableNearby.length})
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {(availableNearby.length > 0 ? availableNearby : [
+              { id: 'av-1', title: 'Veg Biryani', donorName: 'Hotel Paradise', servings: 20, distance: '2.1 km away', timeRemainingMins: 45, imageUrl: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=400&q=80' },
+              { id: 'av-2', title: 'Paneer Curry', donorName: 'Spice Garden', servings: 15, distance: '3.4 km away', timeRemainingMins: 80, imageUrl: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=400&q=80' },
+              { id: 'av-3', title: 'Idli & Sambar', donorName: 'Sri Tiffins', servings: 30, distance: '1.8 km away', timeRemainingMins: 30, imageUrl: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=400&q=80' },
+              { id: 'av-4', title: 'Bread Packets', donorName: 'FreshBake', servings: 50, distance: '2.5 km away', timeRemainingMins: 120, imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=80' }
+            ]).slice(0, 4).map((item) => (
+              <div
+                key={item.id}
+                className="p-4 rounded-2xl bg-[#faf7f2] border border-gray-100 flex flex-col justify-between hover:shadow-md transition-all group"
+              >
+                <div>
+                  <div className="relative h-32 rounded-xl overflow-hidden mb-3">
+                    <img
+                      src={item.imageUrl}
+                      alt={item.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#0f392b]/80 backdrop-blur-md text-white">
+                      {item.servings} Servings
+                    </span>
+                    <span className="absolute top-2 right-2 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/90 text-white">
+                      {item.distance || '2.1 km'}
+                    </span>
+                  </div>
+                  <h4 className="font-bold text-sm text-[#0f392b] line-clamp-1">{item.title}</h4>
+                  <p className="text-xs text-gray-500">{item.donorName}</p>
+                </div>
+
+                <div className="mt-3 pt-3 border-t border-gray-200/60 flex items-center justify-between">
+                  <span className="text-[11px] text-gray-600 font-medium">Pickup today</span>
+                  <button
+                    onClick={() => setSelectedDonation(item)}
+                    className="px-3 py-1.5 rounded-xl bg-[#134e38] hover:bg-[#0f392b] text-white text-xs font-bold transition-colors cursor-pointer"
+                  >
+                    Request
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Right 1 Col: Help Save Food Help People Banner & Recent Activity */}
+        <div className="space-y-6">
+          {/* Heart Banner */}
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#134e38] via-[#0f392b] to-[#1e5842] p-6 text-white shadow-md flex flex-col justify-between">
+            <div className="relative z-10">
+              <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-rose-400 mb-4 shadow-sm text-2xl">
+                ❤️
+              </div>
+              <h3 className="text-xl font-black font-['Outfit'] leading-tight">
+                Help Save Food,<br />Help People.
+              </h3>
+              <p className="text-xs text-white/80 mt-2 leading-relaxed">
+                Together we can create a hunger-free community. Every rescued meal brings dignity and hope.
+              </p>
+            </div>
+            <div className="relative z-10 mt-5 pt-4 border-t border-white/15 flex items-center justify-between">
+              <div className="text-[11px] font-semibold text-[#84cc16]">
+                320+ People Nourished
+              </div>
+              <Link
+                to="/explore"
+                className="text-xs font-bold text-white hover:underline flex items-center gap-1"
+              >
+                <span>Find Food</span>
+                <span>→</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* Recent Activity */}
+          <div className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm space-y-3">
+            <h4 className="font-bold text-sm text-[#0f392b] font-['Outfit']">
+              Recent Activity
+            </h4>
+            <div className="space-y-3 text-xs">
+              <div className="p-3 rounded-xl bg-[#faf7f2] border border-gray-100 flex items-start gap-3">
+                <span className="w-2 h-2 rounded-full bg-[#16a34a] mt-1.5 shrink-0" />
+                <div>
+                  <div className="font-bold text-gray-900">Request Approved</div>
+                  <div className="text-gray-500 text-[11px]">Veg Biryani by Hotel Paradise • 2h ago</div>
+                </div>
+              </div>
+              <div className="p-3 rounded-xl bg-[#faf7f2] border border-gray-100 flex items-start gap-3">
+                <span className="w-2 h-2 rounded-full bg-purple-500 mt-1.5 shrink-0" />
+                <div>
+                  <div className="font-bold text-gray-900">Food Received</div>
+                  <div className="text-gray-500 text-[11px]">Bread Packets by FreshBake • Yesterday</div>
+                </div>
+              </div>
+              <div className="p-3 rounded-xl bg-[#faf7f2] border border-gray-100 flex items-start gap-3">
+                <span className="w-2 h-2 rounded-full bg-amber-500 mt-1.5 shrink-0" />
+                <div>
+                  <div className="font-bold text-gray-900">Pickup Scheduled</div>
+                  <div className="text-gray-500 text-[11px]">Fruits Box by Nature Mart • Today, 4 PM</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       {/* Volunteer Transport & Cold-Chain Checklist Banner */}

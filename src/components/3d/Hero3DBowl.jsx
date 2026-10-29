@@ -370,6 +370,54 @@ export const Hero3DBowl = () => {
           </div>
         </motion.div>
 
+        {/* Scripted Typography on top-right (matching reference) */}
+        <motion.div
+          className="absolute -top-6 right-2 z-20 pointer-events-none hidden sm:block"
+          style={{
+            transform: 'translateZ(40px)',
+          }}
+          animate={{
+            rotate: [1, -1, 1],
+          }}
+          transition={{
+            duration: 6,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        >
+          <div className="font-serif italic text-gray-500 text-xs sm:text-sm tracking-wide text-right leading-tight">
+            Share<br />
+            Love<br />
+            <span className="text-[#16a34a] font-semibold">Nourish</span><br />
+            Together 🍃
+          </div>
+        </motion.div>
+
+        {/* Floating Pill: Fresh Food / Brighter Tomorrows (matching reference bottom right) */}
+        <motion.div
+          className="absolute -bottom-6 right-8 sm:right-16 bg-white/95 backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-xl border border-gray-100 flex items-center gap-3 z-30"
+          style={{
+            transformStyle: 'preserve-3d',
+            transform: 'translateZ(110px)',
+          }}
+          animate={{
+            y: [0, -5, 0],
+          }}
+          transition={{
+            duration: 4.5,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        >
+          <div className="w-8 h-8 rounded-full bg-[#16a34a] text-white flex items-center justify-center shrink-0 shadow-xs">
+            <Leaf className="w-4 h-4 text-white" />
+          </div>
+          <div>
+            <div className="font-bold text-xs text-gray-900 leading-tight">Fresh Food</div>
+            <div className="text-[10px] text-gray-500 font-medium">Brighter Tomorrows</div>
+          </div>
+        </motion.div>
+
       </div>
     </div>
   );
