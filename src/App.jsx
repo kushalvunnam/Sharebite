@@ -81,10 +81,8 @@ const MainLayout = () => {
       
       <main className="flex-1">
         <Routes>
-          {/* Default entry route: / redirects immediately to /login */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
-
-          {/* Landing / Home marketing pages */}
+          {/* Root & Landing marketing pages */}
+          <Route path="/" element={<LandingPage />} />
           <Route path="/home" element={<LandingPage />} />
           <Route path="/landing" element={<LandingPage />} />
 

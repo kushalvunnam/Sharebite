@@ -58,12 +58,20 @@ export const Navbar = () => {
     }
   };
 
-  const logoTarget = currentUser 
-    ? (currentUser.role === 'recipient' ? '/recipient-dashboard' : currentUser.role === 'admin' ? '/admin' : '/donor-dashboard')
-    : '/login';
+  const logoTarget = "/";
+
+  const handleHowItWorksClick = (e) => {
+    if (location.pathname === '/' || location.pathname === '/home' || location.pathname === '/landing') {
+      const el = document.getElementById('how-it-works');
+      if (el) {
+        e.preventDefault();
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
 
   return (
-    <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-white/85 border-b border-[#0f392b]/10 transition-all">
+    <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-white/90 border-b border-[#0f392b]/10 transition-all shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
         {/* Left: Brand Logo */}
         <Logo linkTo={logoTarget} />
@@ -79,11 +87,19 @@ export const Navbar = () => {
             }`}
           >
             <Search className="w-4 h-4" />
-            <span>Find Food</span>
+            <span>Explore</span>
             <span className="ml-1 text-[11px] px-2 py-0.5 rounded-full bg-[#84cc16] text-[#0f392b] font-extrabold">
               {availableListingsCount}
             </span>
           </Link>
+
+          <a
+            href="/#how-it-works"
+            onClick={handleHowItWorksClick}
+            className="px-3.5 py-2 rounded-xl text-sm font-semibold text-gray-700 hover:text-[#0f392b] hover:bg-gray-100/70 transition-colors flex items-center gap-1.5 cursor-pointer"
+          >
+            <span>How It Works</span>
+          </a>
 
           <Link
             to="/impact"
@@ -94,7 +110,7 @@ export const Navbar = () => {
             }`}
           >
             <Sparkles className="w-4 h-4 text-[#84cc16]" />
-            <span>Impact Calculator</span>
+            <span>Impact</span>
           </Link>
 
           <Link
@@ -106,7 +122,7 @@ export const Navbar = () => {
             }`}
           >
             <ShieldCheck className="w-4 h-4 text-[#0f392b]" />
-            <span>Safety & Shield</span>
+            <span>Safety</span>
           </Link>
 
           {/* Quick link to current user's role dashboard */}
@@ -151,7 +167,7 @@ export const Navbar = () => {
         </nav>
 
         {/* Right Action Cluster */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           {/* Backend Connectivity Status Badge */}
           <button
             onClick={checkBackend}
@@ -188,16 +204,24 @@ export const Navbar = () => {
             )}
           </button>
 
-          {/* Role Switcher Pill or Sign In Button */}
+          {/* Role Switcher Pill or Sign In / Join Buttons */}
           {!currentUser ? (
             <div className="flex items-center gap-2">
               <Link
                 to="/login"
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#0f392b] hover:bg-[#164e3b] text-white text-xs font-bold shadow-xs transition-all hover:scale-102"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-gray-700 hover:text-[#0f392b] hover:bg-gray-100 text-xs font-bold transition-all"
               >
-                <LogIn className="w-3.5 h-3.5 text-[#84cc16]" />
+                <LogIn className="w-3.5 h-3.5 text-[#0f392b]" />
                 <span>Sign In</span>
               </Link>
+
+              <Link
+                to="/register"
+                className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0f392b] hover:bg-[#164e3b] text-white text-xs font-bold shadow-xs hover:shadow-md transition-all hover:-translate-y-0.5"
+              >
+                <span>Join the Network</span>
+              </Link>
+
               <div className="relative">
                 <button
                   onClick={() => setRoleDropdownOpen(!roleDropdownOpen)}
@@ -444,26 +468,37 @@ export const Navbar = () => {
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-white border-b border-gray-200 px-4 pt-3 pb-6 space-y-3">
+        <div className="lg:hidden bg-white border-b border-gray-200 px-4 pt-3 pb-6 space-y-2.5 animate-in slide-in-from-top-2">
           <Link
             to="/explore"
             onClick={() => setMobileMenuOpen(false)}
             className="flex items-center justify-between p-3 rounded-xl bg-gray-50 font-semibold text-gray-900"
           >
             <span className="flex items-center gap-2">
-              <Search className="w-4 h-4 text-[#0f392b]" /> Browse Available Food
+              <Search className="w-4 h-4 text-[#0f392b]" /> Explore
             </span>
             <span className="text-xs px-2 py-0.5 rounded-full bg-[#84cc16] text-[#0f392b] font-bold">
               {availableListingsCount}
             </span>
           </Link>
 
+          <a
+            href="/#how-it-works"
+            onClick={(e) => {
+              setMobileMenuOpen(false);
+              handleHowItWorksClick(e);
+            }}
+            className="flex items-center gap-2 p-3 rounded-xl hover:bg-gray-50 font-semibold text-gray-900"
+          >
+            <Utensils className="w-4 h-4 text-[#84cc16]" /> How It Works
+          </a>
+
           <Link
             to="/impact"
             onClick={() => setMobileMenuOpen(false)}
             className="flex items-center gap-2 p-3 rounded-xl hover:bg-gray-50 font-semibold text-gray-900"
           >
-            <Sparkles className="w-4 h-4 text-[#84cc16]" /> Impact Calculator
+            <Sparkles className="w-4 h-4 text-[#84cc16]" /> Impact
           </Link>
 
           <Link
@@ -471,7 +506,7 @@ export const Navbar = () => {
             onClick={() => setMobileMenuOpen(false)}
             className="flex items-center gap-2 p-3 rounded-xl hover:bg-gray-50 font-semibold text-gray-900"
           >
-            <ShieldCheck className="w-4 h-4 text-[#0f392b]" /> Food Safety & Legal Shield
+            <ShieldCheck className="w-4 h-4 text-[#0f392b]" /> Safety
           </Link>
 
           {!currentUser ? (
@@ -479,10 +514,18 @@ export const Navbar = () => {
               <Link
                 to="/login"
                 onClick={() => setMobileMenuOpen(false)}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-bold transition-all"
+              >
+                <LogIn className="w-4 h-4 text-[#0f392b]" />
+                <span>Sign In</span>
+              </Link>
+
+              <Link
+                to="/register"
+                onClick={() => setMobileMenuOpen(false)}
                 className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[#0f392b] text-white text-sm font-bold shadow-md"
               >
-                <LogIn className="w-4 h-4 text-[#84cc16]" />
-                <span>Sign In to ShareBite</span>
+                <span>Join the Network</span>
               </Link>
             </div>
           ) : (
