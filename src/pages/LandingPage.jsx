@@ -1,9 +1,8 @@
 import React from 'react';
 import HeroSection from '../components/landing/HeroSection';
-import ImpactStats from '../components/landing/ImpactStats';
-import CommunityGlobeNetwork from '../components/3d/CommunityGlobeNetwork';
 import FeaturedDonations from '../components/landing/FeaturedDonations';
 import HowItWorks from '../components/landing/HowItWorks';
+import CommunityGlobeNetwork from '../components/3d/CommunityGlobeNetwork';
 import ImpactCalculator from '../components/landing/ImpactCalculator';
 import StakeholderBenefits from '../components/landing/StakeholderBenefits';
 import FoodSafetyNotice from '../components/landing/FoodSafetyNotice';
@@ -11,34 +10,31 @@ import Testimonials from '../components/landing/Testimonials';
 
 export const LandingPage = () => {
   return (
-    <div className="min-h-screen">
-      {/* 1. Hero Section with 3D Food Bowl */}
+    <div className="min-h-screen bg-[#FFFDF8]">
+      {/* 1. Hero Section: Headline, 2 CTAs, Single Appetizing Image, 2 Floating Cards, Compact Impact Row */}
       <HeroSection />
 
-      {/* 2. Live Impact Stats */}
-      <ImpactStats />
+      {/* 2. Immediately Below the Fold: Fresh food, ready to be shared (3 Attractive Cards + View All link) */}
+      <FeaturedDonations />
 
-      {/* 3. 3D Community Network & Autonomous Matching Grid */}
+      {/* 3. Followed by: Visually polished 3-step How ShareBite Works */}
+      <HowItWorks />
+
+      {/* 4. Autonomous Redistribution Network & Coverage */}
       <section className="py-12 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <CommunityGlobeNetwork />
       </section>
 
-      {/* 4. Featured Available Donations */}
-      <FeaturedDonations />
-
-      {/* 5. How ShareBite Works (3-step operational flow) */}
-      <HowItWorks />
-
-      {/* 6. Interactive Impact & Tax Deduction Calculator */}
+      {/* 5. Interactive Environmental & Tax Deduction Calculator */}
       <ImpactCalculator />
 
-      {/* 7. Donor & NGO Benefits */}
+      {/* 6. Donor & NGO Stakeholder Benefits */}
       <StakeholderBenefits />
 
-      {/* 8. Food Safety & Legal Responsibility Notice */}
+      {/* 7. Food Safety & Bill Emerson Good Samaritan Protection */}
       <FoodSafetyNotice />
 
-      {/* 9. Chef & Shelter Testimonials */}
+      {/* 8. Chef & Shelter Testimonials */}
       <Testimonials />
     </div>
   );

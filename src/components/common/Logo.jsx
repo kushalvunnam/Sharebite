@@ -29,12 +29,12 @@ export const Logo = ({ size = "default", showTagline = true, lightMode = false, 
           {/* Sprouting Heart / Leaf Fusion Motif */}
           <path 
             d="M50 20 C40 10, 24 18, 30 35 C34 47, 50 56, 50 56 C50 56, 66 47, 70 35 C76 18, 60 10, 50 20 Z" 
-            fill="#84cc16" 
+            fill="#48A82E" 
           />
           {/* Leaf Central Vein */}
           <path 
             d="M50 22 C48 32, 47 42, 50 52" 
-            stroke="#0f392b" 
+            stroke="#145C3D" 
             strokeWidth="3" 
             strokeLinecap="round" 
           />
@@ -44,7 +44,7 @@ export const Logo = ({ size = "default", showTagline = true, lightMode = false, 
         </svg>
 
         {/* Ambient subtle glow */}
-        <div className="absolute inset-0 rounded-2xl bg-[#84cc16]/20 filter blur-md -z-10 group-hover:blur-lg transition-all" />
+        <div className="absolute inset-0 rounded-2xl bg-[#48A82E]/20 filter blur-md -z-10 group-hover:blur-lg transition-all" />
       </div>
 
       {/* Typography */}
@@ -52,8 +52,8 @@ export const Logo = ({ size = "default", showTagline = true, lightMode = false, 
         <div className="flex items-center gap-1.5 leading-none">
           <span className={`font-black font-['Outfit'] tracking-tight ${
             isLarge ? 'text-3xl' : isSmall ? 'text-lg' : 'text-2xl'
-          } ${lightMode ? 'text-white' : 'text-[#0f392b]'}`}>
-            Share<span className="text-[#84cc16]">Bite</span>
+          } ${lightMode ? 'text-white' : 'text-[#145C3D]'}`}>
+            Share<span className="text-[#48A82E]">Bite</span>
           </span>
           <span className="w-1.5 h-1.5 rounded-full bg-[#f97316]" />
         </div>
