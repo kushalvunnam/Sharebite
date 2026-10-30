@@ -97,7 +97,7 @@ export const RecipientDashboard = () => {
             </div>
           </div>
           <div className="text-3xl sm:text-4xl font-black text-[#0f392b] font-['Outfit'] mt-3">
-            {availableNearby.length > 0 ? availableNearby.length : 8}
+            {availableNearby.length}
           </div>
           <div className="text-[11px] text-[#16a34a] font-semibold mt-1">
             Ready for instant claim
@@ -112,7 +112,7 @@ export const RecipientDashboard = () => {
             </div>
           </div>
           <div className="text-3xl sm:text-4xl font-black text-[#0f392b] font-['Outfit'] mt-3">
-            {myClaimedDonations.length > 0 ? myClaimedDonations.length : 12}
+            {myClaimedDonations.length}
           </div>
           <div className="text-[11px] text-gray-500 mt-1">
             Pickups coordinated
@@ -127,7 +127,7 @@ export const RecipientDashboard = () => {
             </div>
           </div>
           <div className="text-3xl sm:text-4xl font-black text-[#0f392b] font-['Outfit'] mt-3">
-            {pastReceived.length > 0 ? pastReceived.length : 6}
+            {pastReceived.length}
           </div>
           <div className="text-[11px] text-gray-500 mt-1">
             Batches delivered safely
@@ -142,7 +142,7 @@ export const RecipientDashboard = () => {
             </div>
           </div>
           <div className="text-3xl sm:text-4xl font-black text-[#0f392b] font-['Outfit'] mt-3">
-            {totalDistributed > 0 ? totalDistributed : 320}
+            {totalDistributed}
           </div>
           <div className="text-[11px] text-emerald-700 font-semibold mt-1">
             Community members nourished
@@ -170,45 +170,54 @@ export const RecipientDashboard = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {(availableNearby.length > 0 ? availableNearby : [
-              { id: 'av-1', title: 'Veg Biryani', donorName: 'Hotel Paradise', servings: 20, distance: '2.1 km away', timeRemainingMins: 45, imageUrl: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=400&q=80' },
-              { id: 'av-2', title: 'Paneer Curry', donorName: 'Spice Garden', servings: 15, distance: '3.4 km away', timeRemainingMins: 80, imageUrl: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=400&q=80' },
-              { id: 'av-3', title: 'Idli & Sambar', donorName: 'Sri Tiffins', servings: 30, distance: '1.8 km away', timeRemainingMins: 30, imageUrl: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=400&q=80' },
-              { id: 'av-4', title: 'Bread Packets', donorName: 'FreshBake', servings: 50, distance: '2.5 km away', timeRemainingMins: 120, imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=80' }
-            ]).slice(0, 4).map((item) => (
-              <div
-                key={item.id}
-                className="p-4 rounded-2xl bg-[#faf7f2] border border-gray-100 flex flex-col justify-between hover:shadow-md transition-all group"
-              >
-                <div>
-                  <div className="relative h-32 rounded-xl overflow-hidden mb-3">
-                    <img
-                      src={item.imageUrl}
-                      alt={item.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#0f392b]/80 backdrop-blur-md text-white">
-                      {item.servings} Servings
-                    </span>
-                    <span className="absolute top-2 right-2 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/90 text-white">
-                      {item.distance || '2.1 km'}
-                    </span>
-                  </div>
-                  <h4 className="font-bold text-sm text-[#0f392b] line-clamp-1">{item.title}</h4>
-                  <p className="text-xs text-gray-500">{item.donorName}</p>
-                </div>
-
-                <div className="mt-3 pt-3 border-t border-gray-200/60 flex items-center justify-between">
-                  <span className="text-[11px] text-gray-600 font-medium">Pickup today</span>
-                  <button
-                    onClick={() => setSelectedDonation(item)}
-                    className="px-3 py-1.5 rounded-xl bg-[#134e38] hover:bg-[#0f392b] text-white text-xs font-bold transition-colors cursor-pointer"
-                  >
-                    Request
-                  </button>
-                </div>
+            {availableNearby.length === 0 ? (
+              <div className="sm:col-span-2 p-8 rounded-2xl bg-[#faf7f2] border border-dashed border-gray-200 text-center">
+                <Utensils className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                <h4 className="font-bold text-xs text-gray-700">No surplus food currently available</h4>
+                <p className="text-[11px] text-gray-500 mt-0.5 mb-3">Check back soon or explore scheduled community donations across Hyderabad.</p>
+                <Link
+                  to="/explore"
+                  className="px-4 py-2 rounded-xl bg-[#134e38] text-white text-xs font-bold hover:bg-[#0f392b] transition-all inline-block"
+                >
+                  Browse Catalog
+                </Link>
               </div>
-            ))}
+            ) : (
+              availableNearby.slice(0, 4).map((item) => (
+                <div
+                  key={item.id}
+                  className="p-4 rounded-2xl bg-[#faf7f2] border border-gray-100 flex flex-col justify-between hover:shadow-md transition-all group"
+                >
+                  <div>
+                    <div className="relative h-32 rounded-xl overflow-hidden mb-3">
+                      <img
+                        src={item.imageUrl}
+                        alt={item.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#0f392b]/80 backdrop-blur-md text-white">
+                        {item.servings} Servings
+                      </span>
+                      <span className="absolute top-2 right-2 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/90 text-white">
+                        {item.distance || '2.1 km'}
+                      </span>
+                    </div>
+                    <h4 className="font-bold text-sm text-[#0f392b] line-clamp-1">{item.title}</h4>
+                    <p className="text-xs text-gray-500">{item.donorName}</p>
+                  </div>
+
+                  <div className="mt-3 pt-3 border-t border-gray-200/60 flex items-center justify-between">
+                    <span className="text-[11px] text-gray-600 font-medium">Pickup today</span>
+                    <button
+                      onClick={() => setSelectedDonation(item)}
+                      className="px-3 py-1.5 rounded-xl bg-[#134e38] hover:bg-[#0f392b] text-white text-xs font-bold transition-colors cursor-pointer"
+                    >
+                      Request
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -229,7 +238,7 @@ export const RecipientDashboard = () => {
             </div>
             <div className="relative z-10 mt-5 pt-4 border-t border-white/15 flex items-center justify-between">
               <div className="text-[11px] font-semibold text-[#84cc16]">
-                320+ People Nourished
+                {totalDistributed > 0 ? `${totalDistributed}+ People Nourished` : '0 People Nourished'}
               </div>
               <Link
                 to="/explore"
@@ -247,27 +256,32 @@ export const RecipientDashboard = () => {
               Recent Activity
             </h4>
             <div className="space-y-3 text-xs">
-              <div className="p-3 rounded-xl bg-[#faf7f2] border border-gray-100 flex items-start gap-3">
-                <span className="w-2 h-2 rounded-full bg-[#16a34a] mt-1.5 shrink-0" />
-                <div>
-                  <div className="font-bold text-gray-900">Request Approved</div>
-                  <div className="text-gray-500 text-[11px]">Veg Biryani by Hotel Paradise • 2h ago</div>
+              {myClaimedDonations.length === 0 && pastReceived.length === 0 ? (
+                <div className="p-4 rounded-xl bg-[#faf7f2] border border-gray-100 text-center text-gray-500 text-[11px]">
+                  No recent activity yet. Claim surplus batches to see pickup updates.
                 </div>
-              </div>
-              <div className="p-3 rounded-xl bg-[#faf7f2] border border-gray-100 flex items-start gap-3">
-                <span className="w-2 h-2 rounded-full bg-purple-500 mt-1.5 shrink-0" />
-                <div>
-                  <div className="font-bold text-gray-900">Food Received</div>
-                  <div className="text-gray-500 text-[11px]">Bread Packets by FreshBake • Yesterday</div>
-                </div>
-              </div>
-              <div className="p-3 rounded-xl bg-[#faf7f2] border border-gray-100 flex items-start gap-3">
-                <span className="w-2 h-2 rounded-full bg-amber-500 mt-1.5 shrink-0" />
-                <div>
-                  <div className="font-bold text-gray-900">Pickup Scheduled</div>
-                  <div className="text-gray-500 text-[11px]">Fruits Box by Nature Mart • Today, 4 PM</div>
-                </div>
-              </div>
+              ) : (
+                <>
+                  {myClaimedDonations.slice(0, 2).map((item) => (
+                    <div key={item.id} className="p-3 rounded-xl bg-[#faf7f2] border border-gray-100 flex items-start gap-3">
+                      <span className="w-2 h-2 rounded-full bg-[#16a34a] mt-1.5 shrink-0" />
+                      <div>
+                        <div className="font-bold text-gray-900">Pickup Scheduled</div>
+                        <div className="text-gray-500 text-[11px]">{item.title} by {item.donorName} • Ready for pickup</div>
+                      </div>
+                    </div>
+                  ))}
+                  {pastReceived.slice(0, 2).map((item) => (
+                    <div key={item.id} className="p-3 rounded-xl bg-[#faf7f2] border border-gray-100 flex items-start gap-3">
+                      <span className="w-2 h-2 rounded-full bg-purple-500 mt-1.5 shrink-0" />
+                      <div>
+                        <div className="font-bold text-gray-900">Food Received</div>
+                        <div className="text-gray-500 text-[11px]">{item.title} by {item.donorName} • Verified</div>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
             </div>
           </div>
         </div>

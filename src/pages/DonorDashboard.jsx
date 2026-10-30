@@ -40,6 +40,12 @@ export const DonorDashboard = () => {
 
   const totalPortionsDonated = donorListings.reduce((sum, d) => sum + (d.servings || 0), 0);
   const totalTaxSavedUsd = Math.round(totalPortionsDonated * 3.8);
+  const ngosSupportedCount = new Set(donorListings.filter(d => d.claimedBy).map(d => d.claimedBy)).size;
+  const totalFoodSavedKg = Math.round(donorListings.reduce((sum, d) => sum + (d.weightKg || (d.servings ? d.servings * 0.45 : 0)), 0));
+  const mealsProgressPct = Math.min(100, Math.round((totalPortionsDonated / 200) * 100));
+  const foodSavedProgressPct = Math.min(100, Math.round((totalFoodSavedKg / 100) * 100));
+  const peopleHelpedProgressPct = Math.min(100, Math.round((totalPortionsDonated / 150) * 100));
+  const ngosProgressPct = Math.min(100, Math.round((ngosSupportedCount / 10) * 100));
 
   const handleVerifyOtp = (e) => {
     e.preventDefault();
@@ -121,10 +127,10 @@ export const DonorDashboard = () => {
             </div>
           </div>
           <div className="text-3xl sm:text-4xl font-black text-[#0f392b] font-['Outfit'] mt-3">
-            {donorListings.length > 0 ? donorListings.length : 24}
+            {donorListings.length}
           </div>
           <div className="text-[11px] text-[#16a34a] font-semibold mt-1 flex items-center gap-1">
-            <span>↑ +4 this week</span>
+            <span>{donorListings.length > 0 ? `${donorListings.length} batches listed` : 'Ready to list surplus'}</span>
           </div>
         </TiltCard>
 
@@ -136,7 +142,7 @@ export const DonorDashboard = () => {
             </div>
           </div>
           <div className="text-3xl sm:text-4xl font-black text-[#0f392b] font-['Outfit'] mt-3">
-            {totalPortionsDonated > 0 ? totalPortionsDonated : 186}
+            {totalPortionsDonated}
           </div>
           <div className="text-[11px] text-gray-500 mt-1">
             Nutritious portions distributed
@@ -151,7 +157,7 @@ export const DonorDashboard = () => {
             </div>
           </div>
           <div className="text-3xl sm:text-4xl font-black text-[#0f392b] font-['Outfit'] mt-3">
-            12
+            {ngosSupportedCount}
           </div>
           <div className="text-[11px] text-gray-500 mt-1">
             Verified local shelter partners
@@ -166,7 +172,7 @@ export const DonorDashboard = () => {
             </div>
           </div>
           <div className="text-3xl sm:text-4xl font-black text-[#0f392b] font-['Outfit'] mt-3">
-            {Math.round(totalPortionsDonated * 0.45) > 0 ? `${Math.round(totalPortionsDonated * 0.45)} kg` : '45 kg'}
+            {totalFoodSavedKg} kg
           </div>
           <div className="text-[11px] text-emerald-700 font-semibold mt-1">
             Zero edible waste diverted
@@ -184,7 +190,9 @@ export const DonorDashboard = () => {
             Turn Surplus Food into Smiles
           </h2>
           <p className="text-xs sm:text-sm text-white/80 mt-2 leading-relaxed">
-            Your donations have fed over 120 people this week alone. Every listed batch connects instantly with verified shelters across Hyderabad.
+            {totalPortionsDonated > 0
+              ? `Your donations have fed ${totalPortionsDonated} people so far. Every listed batch connects instantly with verified shelters across Hyderabad.`
+              : 'Every batch you list connects instantly with verified shelters across Hyderabad. Turn excess kitchen food into immediate community impact.'}
           </p>
           <div className="mt-4 flex items-center gap-3">
             <button
@@ -230,48 +238,58 @@ export const DonorDashboard = () => {
           </div>
 
           <div className="space-y-3">
-            {(donorListings.length > 0 ? donorListings : [
-              { id: 'rec-1', title: 'Veg Biryani', servings: 20, weightKg: 8, status: 'claimed', claimedBy: 'NGO Care Foundation', imageUrl: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=400&q=80' },
-              { id: 'rec-2', title: 'Paneer Curry', servings: 15, weightKg: 5, status: 'available', claimedBy: null, imageUrl: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=400&q=80' },
-              { id: 'rec-3', title: 'Veg Pulav', servings: 18, weightKg: 6, status: 'completed', claimedBy: 'City Shelter Network', imageUrl: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?auto=format&fit=crop&w=400&q=80' }
-            ]).slice(0, 5).map((item) => (
-              <div
-                key={item.id}
-                onClick={() => setSelectedDonation(item)}
-                className="p-4 rounded-2xl bg-[#faf7f2] hover:bg-emerald-50/50 border border-gray-100 transition-all flex items-center justify-between gap-4 cursor-pointer group"
-              >
-                <div className="flex items-center gap-3">
-                  <img
-                    src={item.imageUrl}
-                    alt={item.title}
-                    className="w-12 h-12 rounded-xl object-cover shrink-0 border border-gray-200"
-                  />
-                  <div>
-                    <h4 className="font-bold text-sm text-[#0f392b] group-hover:text-[#16a34a] transition-colors">
-                      {item.title}
-                    </h4>
-                    <p className="text-xs text-gray-500">
-                      {item.servings} Servings • {item.claimedBy || "Awaiting shelter claim"}
-                    </p>
+            {donorListings.length === 0 ? (
+              <div className="p-8 rounded-2xl bg-[#faf7f2] border border-dashed border-gray-200 text-center">
+                <Utensils className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                <h4 className="font-bold text-xs text-gray-700">No surplus donations listed yet</h4>
+                <p className="text-[11px] text-gray-500 mt-0.5 mb-3">Post your commercial surplus food to connect with verified shelters in Hyderabad.</p>
+                <button
+                  onClick={() => setIsPostWizardOpen(true)}
+                  className="px-4 py-2 rounded-xl bg-[#134e38] text-white text-xs font-bold hover:bg-[#0f392b] transition-all cursor-pointer"
+                >
+                  + Create First Donation
+                </button>
+              </div>
+            ) : (
+              donorListings.slice(0, 5).map((item) => (
+                <div
+                  key={item.id || item._id}
+                  onClick={() => setSelectedDonation(item)}
+                  className="p-4 rounded-2xl bg-[#faf7f2] hover:bg-emerald-50/50 border border-gray-100 transition-all flex items-center justify-between gap-4 cursor-pointer group"
+                >
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={item.imageUrl || "https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=400&q=80"}
+                      alt={item.title}
+                      className="w-12 h-12 rounded-xl object-cover shrink-0 border border-gray-200"
+                    />
+                    <div>
+                      <h4 className="font-bold text-sm text-[#0f392b] group-hover:text-[#16a34a] transition-colors">
+                        {item.title}
+                      </h4>
+                      <p className="text-xs text-gray-500">
+                        {item.servings} Servings • {item.claimedBy || "Awaiting shelter claim"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold capitalize ${
+                      item.status === 'completed'
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : item.status === 'claimed'
+                        ? 'bg-amber-100 text-amber-800'
+                        : 'bg-[#16a34a]/15 text-[#0f392b]'
+                    }`}>
+                      {item.status === 'claimed' ? 'Picked Up' : item.status === 'available' ? 'Scheduled' : 'Completed'}
+                    </span>
+                    <span className="text-gray-400 group-hover:text-[#0f392b] group-hover:translate-x-0.5 transition-all text-sm">
+                      →
+                    </span>
                   </div>
                 </div>
-
-                <div className="flex items-center gap-2">
-                  <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold capitalize ${
-                    item.status === 'completed'
-                      ? 'bg-emerald-100 text-emerald-800'
-                      : item.status === 'claimed'
-                      ? 'bg-amber-100 text-amber-800'
-                      : 'bg-[#16a34a]/15 text-[#0f392b]'
-                  }`}>
-                    {item.status === 'claimed' ? 'Picked Up' : item.status === 'available' ? 'Scheduled' : 'Completed'}
-                  </span>
-                  <span className="text-gray-400 group-hover:text-[#0f392b] group-hover:translate-x-0.5 transition-all text-sm">
-                    →
-                  </span>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
@@ -290,40 +308,40 @@ export const DonorDashboard = () => {
             <div>
               <div className="flex items-center justify-between text-xs font-bold text-gray-700 mb-1">
                 <span>Meals Shared</span>
-                <span className="text-[#16a34a]">186</span>
+                <span className="text-[#16a34a]">{totalPortionsDonated}</span>
               </div>
               <div className="w-full h-3 rounded-full bg-gray-100 overflow-hidden">
-                <div className="h-full rounded-full bg-[#16a34a]" style={{ width: '85%' }}></div>
+                <div className="h-full rounded-full bg-[#16a34a]" style={{ width: `${mealsProgressPct}%` }}></div>
               </div>
             </div>
 
             <div>
               <div className="flex items-center justify-between text-xs font-bold text-gray-700 mb-1">
                 <span>Food Saved</span>
-                <span className="text-[#0f392b]">45 kg</span>
+                <span className="text-[#0f392b]">{totalFoodSavedKg} kg</span>
               </div>
               <div className="w-full h-3 rounded-full bg-gray-100 overflow-hidden">
-                <div className="h-full rounded-full bg-[#0f392b]" style={{ width: '60%' }}></div>
+                <div className="h-full rounded-full bg-[#0f392b]" style={{ width: `${foodSavedProgressPct}%` }}></div>
               </div>
             </div>
 
             <div>
               <div className="flex items-center justify-between text-xs font-bold text-gray-700 mb-1">
                 <span>People Helped</span>
-                <span className="text-purple-600">120</span>
+                <span className="text-purple-600">{totalPortionsDonated}</span>
               </div>
               <div className="w-full h-3 rounded-full bg-gray-100 overflow-hidden">
-                <div className="h-full rounded-full bg-purple-500" style={{ width: '75%' }}></div>
+                <div className="h-full rounded-full bg-purple-500" style={{ width: `${peopleHelpedProgressPct}%` }}></div>
               </div>
             </div>
 
             <div>
               <div className="flex items-center justify-between text-xs font-bold text-gray-700 mb-1">
                 <span>NGOs Supported</span>
-                <span className="text-amber-600">12</span>
+                <span className="text-amber-600">{ngosSupportedCount}</span>
               </div>
               <div className="w-full h-3 rounded-full bg-gray-100 overflow-hidden">
-                <div className="h-full rounded-full bg-amber-500" style={{ width: '45%' }}></div>
+                <div className="h-full rounded-full bg-amber-500" style={{ width: `${ngosProgressPct}%` }}></div>
               </div>
             </div>
           </div>
@@ -331,7 +349,7 @@ export const DonorDashboard = () => {
           <div className="p-3.5 rounded-2xl bg-[#faf7f2] border border-[#0f392b]/10 text-center">
             <div className="text-[11px] font-bold text-gray-500 uppercase">Estimated Tax Deductions</div>
             <div className="text-xl font-black text-emerald-800 font-['Outfit'] mt-0.5">
-              ${totalTaxSavedUsd > 0 ? totalTaxSavedUsd.toLocaleString() : '706'}
+              ${totalTaxSavedUsd.toLocaleString()}
             </div>
             <div className="text-[10px] text-gray-400 mt-0.5">IRS 170(e)(3) deduction eligible</div>
           </div>

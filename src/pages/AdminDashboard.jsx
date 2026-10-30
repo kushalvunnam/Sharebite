@@ -293,11 +293,11 @@ export const AdminDashboard = () => {
             </div>
             <div className="text-[11px] text-gray-500 flex items-center gap-2 mt-1">
               <span className="inline-flex items-center gap-1 font-bold text-[#0f392b]">
-                <Utensils className="w-3 h-3 text-[#84cc16]" /> {stats?.users?.donors ?? 1} Donors
+                <Utensils className="w-3 h-3 text-[#84cc16]" /> {stats?.users?.donors ?? 0} Donors
               </span>
               <span>•</span>
               <span className="inline-flex items-center gap-1 font-bold text-[#f97316]">
-                <HeartHandshake className="w-3 h-3 text-[#f97316]" /> {stats?.users?.recipients ?? 1} NGOs
+                <HeartHandshake className="w-3 h-3 text-[#f97316]" /> {stats?.users?.recipients ?? 0} NGOs
               </span>
             </div>
           </div>
@@ -530,7 +530,7 @@ export const AdminDashboard = () => {
                     <span className="text-xs font-bold text-gray-900">Commercial Donors</span>
                   </div>
                   <span className="text-xs font-extrabold text-[#0f392b] bg-white px-2 py-0.5 rounded-md border border-emerald-300">
-                    {stats?.users?.donors ?? 1}
+                    {stats?.users?.donors ?? 0}
                   </span>
                 </div>
 
@@ -540,7 +540,7 @@ export const AdminDashboard = () => {
                     <span className="text-xs font-bold text-gray-900">Charitable NGOs</span>
                   </div>
                   <span className="text-xs font-extrabold text-amber-900 bg-white px-2 py-0.5 rounded-md border border-amber-300">
-                    {stats?.users?.recipients ?? 1}
+                    {stats?.users?.recipients ?? 0}
                   </span>
                 </div>
 
@@ -550,7 +550,7 @@ export const AdminDashboard = () => {
                     <span className="text-xs font-bold text-gray-900">Safety Administrators</span>
                   </div>
                   <span className="text-xs font-extrabold text-purple-900 bg-white px-2 py-0.5 rounded-md border border-purple-300">
-                    {stats?.users?.admins ?? 2}
+                    {stats?.users?.admins ?? 0}
                   </span>
                 </div>
               </div>

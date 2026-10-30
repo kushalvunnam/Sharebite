@@ -51,17 +51,17 @@ export const AppProvider = ({ children }) => {
   const [apiHealth, setApiHealth] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Load donations from localStorage or fallback to reference items
+  // Load donations from localStorage (empty baseline for fresh testing)
   const [donations, setDonations] = useState(() => {
     try {
       const saved = localStorage.getItem('sharebite_donations_v2');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) return parsed;
       }
-      return INITIAL_DONATIONS;
+      return [];
     } catch {
-      return INITIAL_DONATIONS;
+      return [];
     }
   });
 
@@ -79,7 +79,7 @@ export const AppProvider = ({ children }) => {
     }
   });
 
-  // Notifications
+  // Notifications (empty baseline for fresh testing)
   const [notifications, setNotifications] = useState(() => {
     try {
       const savedNotifs = localStorage.getItem('sharebite_notifs');
@@ -90,9 +90,9 @@ export const AppProvider = ({ children }) => {
           : [];
         return sanitized;
       }
-      return INITIAL_NOTIFICATIONS;
+      return [];
     } catch {
-      return INITIAL_NOTIFICATIONS;
+      return [];
     }
   });
 
@@ -168,7 +168,7 @@ export const AppProvider = ({ children }) => {
       // Fetch live listings if connected
       try {
         const res = await api.listings.getAll();
-        if (res && res.data && res.data.length > 0) {
+        if (res && Array.isArray(res.data)) {
           // Normalize backend listings to frontend schema
           const normalized = res.data.map((l) => ({
             id: l._id || l.id,

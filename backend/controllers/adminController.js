@@ -3,6 +3,14 @@ import FoodListing from '../models/FoodListing.js';
 import DonationRequest from '../models/DonationRequest.js';
 import Report from '../models/Report.js';
 
+// Pre-seeded authentication accounts preserved for user logins and test baseline
+const SEED_EMAILS = [
+  'admin@sharebite.org',
+  'david.safety@sharebite.org',
+  'marco@verdeosteria.com',
+  'sarah@eastsidehope.org'
+];
+
 export const getAdminStats = async (req, res, next) => {
   try {
     const [
@@ -11,6 +19,10 @@ export const getAdminStats = async (req, res, next) => {
       recipientCount,
       adminCount,
       unverifiedCount,
+      seedUsersCount,
+      seedDonorsCount,
+      seedRecipientsCount,
+      seedAdminsCount,
       totalListings,
       activeListings,
       completedListings,
@@ -31,6 +43,10 @@ export const getAdminStats = async (req, res, next) => {
       User.countDocuments({ role: 'recipient' }),
       User.countDocuments({ role: 'admin' }),
       User.countDocuments({ isVerified: false }),
+      User.countDocuments({ email: { $in: SEED_EMAILS } }),
+      User.countDocuments({ role: 'donor', email: { $in: SEED_EMAILS } }),
+      User.countDocuments({ role: 'recipient', email: { $in: SEED_EMAILS } }),
+      User.countDocuments({ role: 'admin', email: { $in: SEED_EMAILS } }),
       FoodListing.countDocuments(),
       FoodListing.countDocuments({ status: 'available' }),
       FoodListing.countDocuments({ status: 'completed' }),
@@ -52,15 +68,23 @@ export const getAdminStats = async (req, res, next) => {
     const co2KgAvoided = Math.round(mealsRescued * 2.5);
     const waterLitersSaved = Math.round(mealsRescued * 410);
 
+    const activeTotalUsers = Math.max(0, totalUsers - seedUsersCount);
+    const activeDonors = Math.max(0, donorCount - seedDonorsCount);
+    const activeRecipients = Math.max(0, recipientCount - seedRecipientsCount);
+    const activeAdmins = Math.max(0, adminCount - seedAdminsCount);
+
     res.status(200).json({
       success: true,
       data: {
         users: {
-          total: totalUsers,
-          donors: donorCount,
-          recipients: recipientCount,
-          admins: adminCount,
+          total: activeTotalUsers,
+          donors: activeDonors,
+          recipients: activeRecipients,
+          admins: activeAdmins,
           unverified: unverifiedCount,
+          rawTotal: totalUsers,
+          rawDonors: donorCount,
+          rawRecipients: recipientCount,
         },
         listings: {
           total: totalListings,

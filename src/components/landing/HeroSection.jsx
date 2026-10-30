@@ -37,11 +37,12 @@ export const HeroSection = () => {
     }
   };
 
-  // Derive real statistics from application data
+  // Derive real statistics from application data (defaults to 0 for fresh baseline)
   const actualMealsShared = donations.reduce((sum, d) => sum + (d.servings || 0), 0) + (totalMealsSaved || 0);
-  const mealsCountDisplay = actualMealsShared > 0 ? actualMealsShared.toLocaleString() : '10,480';
-  const partnerNgosDisplay = '500+';
-  const peopleSupportedDisplay = actualMealsShared > 0 ? Math.round(actualMealsShared * 1.4).toLocaleString() : '14,600';
+  const partnerNgosCount = new Set(donations.filter(d => d.claimedBy).map(d => d.claimedBy)).size;
+  const mealsCountDisplay = actualMealsShared > 0 ? `${actualMealsShared.toLocaleString()}+` : '0';
+  const partnerNgosDisplay = partnerNgosCount > 0 ? `${partnerNgosCount}+` : '0';
+  const peopleSupportedDisplay = actualMealsShared > 0 ? `${Math.round(actualMealsShared * 1.4).toLocaleString()}+` : '0';
 
   return (
     <section className="relative overflow-hidden bg-[#FFFDF8] pt-10 pb-16 lg:pt-16 lg:pb-24">
@@ -110,7 +111,7 @@ export const HeroSection = () => {
               <div className="grid grid-cols-3 gap-4 text-left">
                 <div>
                   <div className="text-2xl sm:text-3xl font-black text-[#145C3D] font-['Outfit']">
-                    {mealsCountDisplay}+
+                    {mealsCountDisplay}
                   </div>
                   <div className="text-xs text-gray-500 font-medium mt-0.5">
                     Meals shared
@@ -128,7 +129,7 @@ export const HeroSection = () => {
 
                 <div className="border-l border-gray-200/80 pl-4">
                   <div className="text-2xl sm:text-3xl font-black text-[#145C3D] font-['Outfit']">
-                    {peopleSupportedDisplay}+
+                    {peopleSupportedDisplay}
                   </div>
                   <div className="text-xs text-gray-500 font-medium mt-0.5">
                     People supported
