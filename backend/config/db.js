@@ -74,12 +74,36 @@ const seedInitialAccounts = async () => {
 // Disable command buffering so queries fail fast when disconnected rather than hanging
 mongoose.set('bufferCommands', false);
 
+export const sanitizeMongoUri = (rawUri) => {
+  if (!rawUri || typeof rawUri !== 'string') return rawUri;
+  const match = rawUri.match(/^(mongodb(?:\+srv)?:\/\/)([^:]+):([^@]+)@(.+)$/);
+  if (!match) return rawUri;
+  const [, protocol, username, password, rest] = match;
+  let cleanPass;
+  try {
+    cleanPass = encodeURIComponent(decodeURIComponent(password));
+  } catch {
+    cleanPass = encodeURIComponent(password);
+  }
+  let cleanUser;
+  try {
+    cleanUser = encodeURIComponent(decodeURIComponent(username));
+  } catch {
+    cleanUser = encodeURIComponent(username);
+  }
+  return `${protocol}${cleanUser}:${cleanPass}@${rest}`;
+};
+
 export const connectDB = async () => {
   if (isConnected && mongoose.connection.readyState === 1) {
     return mongoose.connection;
   }
 
   let mongoUri = process.env.MONGODB_URI;
+
+  if (mongoUri) {
+    mongoUri = sanitizeMongoUri(mongoUri);
+  }
 
   if (!mongoUri || mongoUri.includes('<username>') || mongoUri.includes('<password>')) {
     try {
