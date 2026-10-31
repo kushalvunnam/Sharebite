@@ -47,12 +47,12 @@ export const DonorDashboard = () => {
   const peopleHelpedProgressPct = Math.min(100, Math.round((totalPortionsDonated / 150) * 100));
   const ngosProgressPct = Math.min(100, Math.round((ngosSupportedCount / 10) * 100));
 
-  const handleVerifyOtp = (e) => {
+  const handleVerifyOtp = async (e) => {
     e.preventDefault();
     if (!verifyingDonation) return;
 
-    const res = completeDonation(verifyingDonation.id, enteredOtp);
-    if (res.success) {
+    const res = await completeDonation(verifyingDonation.id, enteredOtp);
+    if (res?.success) {
       try {
         confetti({
           particleCount: 90,

@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { connectDB, getDBStatus } from './config/db.js';
+import { connectDB, getDBStatus, isMemoryFallback } from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import listingRoutes from './routes/listingRoutes.js';
@@ -77,13 +77,21 @@ app.get('/health', (req, res) => {
 // Health endpoint
 app.get('/api/health', (req, res) => {
   const dbStatus = getDBStatus();
-  res.status(200).json({
-    status: dbStatus === 'connected' ? 'healthy' : 'degraded',
+  const memoryFallback = isMemoryFallback();
+  const isProd = process.env.NODE_ENV === 'production';
+  const isHealthy = dbStatus === 'connected' && (!isProd || !memoryFallback);
+
+  const statusCode = isHealthy ? 200 : (isProd ? 503 : 200);
+
+  res.status(statusCode).json({
+    status: isHealthy ? 'healthy' : 'degraded',
     service: 'ShareBite REST API',
     version: '2.0.0',
     uptime: Math.floor(process.uptime()),
     timestamp: new Date().toISOString(),
     database: dbStatus,
+    persistent: !memoryFallback && dbStatus === 'connected',
+    environment: process.env.NODE_ENV || 'development',
   });
 });
 
@@ -119,11 +127,14 @@ const isTestEnv =
   process.argv.some((a) => a.includes('test'));
 
 if (!isTestEnv) {
-  connectDB().then(() => {
-    app.listen(PORT, () => {
-      console.log(`[ShareBite API] Backend server running on port ${PORT}`);
-      console.log(`[ShareBite API] Health check available at http://localhost:${PORT}/api/health`);
-    });
+  // Listen on PORT immediately so host platform (Render) detects open port without delay
+  app.listen(PORT, () => {
+    console.log(`[ShareBite API] Backend server running on port ${PORT}`);
+    console.log(`[ShareBite API] Health check available at http://localhost:${PORT}/api/health`);
+  });
+
+  connectDB().catch((err) => {
+    console.error('[ShareBite DB] Background DB connection error:', err.message);
   });
 }
 

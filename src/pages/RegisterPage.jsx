@@ -128,7 +128,14 @@ export const RegisterPage = () => {
             <div className="grid grid-cols-2 gap-2 p-1 rounded-2xl bg-[#faf7f2] border border-gray-200">
               <button
                 type="button"
-                onClick={() => setRole('donor')}
+                onClick={() => {
+                  setRole('donor');
+                  setErrorMessage('');
+                  setFormData(prev => ({
+                    ...prev,
+                    orgType: prev.orgType === 'Non-Profit / Food Bank' ? 'Restaurant & Trattoria' : prev.orgType
+                  }));
+                }}
                 className={`py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
                   role === 'donor'
                     ? 'bg-[#0f392b] text-white shadow-xs'
@@ -141,7 +148,14 @@ export const RegisterPage = () => {
 
               <button
                 type="button"
-                onClick={() => setRole('recipient')}
+                onClick={() => {
+                  setRole('recipient');
+                  setErrorMessage('');
+                  setFormData(prev => ({
+                    ...prev,
+                    orgType: prev.orgType === 'Restaurant & Trattoria' ? 'Non-Profit / Food Bank' : prev.orgType
+                  }));
+                }}
                 className={`py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
                   role === 'recipient'
                     ? 'bg-[#0f392b] text-white shadow-xs'

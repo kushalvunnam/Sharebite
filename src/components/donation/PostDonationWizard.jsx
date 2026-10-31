@@ -79,27 +79,29 @@ export const PostDonationWizard = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.title) return;
 
-    addDonation({
+    const res = await addDonation({
       ...formData,
       allergens: formData.allergens.split(',').map(s => s.trim()).filter(Boolean)
     });
 
-    try {
-      confetti({
-        particleCount: 100,
-        spread: 80,
-        origin: { y: 0.5 }
-      });
-    } catch {
-      // ignore
-    }
+    if (res && res.success !== false) {
+      try {
+        confetti({
+          particleCount: 100,
+          spread: 80,
+          origin: { y: 0.5 }
+        });
+      } catch {
+        // ignore
+      }
 
-    setIsPostWizardOpen(false);
-    setStep(1);
+      setIsPostWizardOpen(false);
+      setStep(1);
+    }
   };
 
   return (

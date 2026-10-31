@@ -61,23 +61,24 @@ export const DonationDetailModal = () => {
   const isClaimed = selectedDonation?.status === 'claimed';
   const isCompleted = selectedDonation?.status === 'completed';
 
-  const handleClaim = () => {
+  const handleClaim = async () => {
     if (!selectedDonation) return;
     const recipientOrg = currentUser?.role === 'recipient' 
       ? currentUser.organization 
       : "Eastside Hope Food Rescue & Shelter";
     
-    claimDonation(selectedDonation.id, recipientOrg);
-    
-    // Trigger celebratory confetti
-    try {
-      confetti({
-        particleCount: 80,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
-    } catch {
-      // ignore
+    const res = await claimDonation(selectedDonation.id, recipientOrg);
+    if (res && res.success !== false) {
+      // Trigger celebratory confetti
+      try {
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      } catch {
+        // ignore
+      }
     }
   };
 

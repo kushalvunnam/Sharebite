@@ -64,7 +64,7 @@ export const register = async (req, res, next) => {
       phone: phone?.trim() || '',
       address: address?.trim() || '',
       profileDetails: profileDetails || {},
-      isVerified: assignedRole === 'donor', // Demo convenience; donor is verified by default
+      isVerified: true, // Both donor and recipient are automatically verified
     });
 
     const token = generateToken(user);

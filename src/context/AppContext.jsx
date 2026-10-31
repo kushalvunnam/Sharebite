@@ -169,34 +169,52 @@ export const AppProvider = ({ children }) => {
       try {
         const res = await api.listings.getAll();
         if (res && Array.isArray(res.data)) {
+          // Also fetch requests if user is authenticated to associate OTP and verification pass
+          let userRequests = [];
+          if (api.getAuthToken()) {
+            try {
+              const reqRes = await api.requests.getMy();
+              if (reqRes && Array.isArray(reqRes.data)) {
+                userRequests = reqRes.data;
+              }
+            } catch {
+              // ignore
+            }
+          }
+
           // Normalize backend listings to frontend schema
-          const normalized = res.data.map((l) => ({
-            id: l._id || l.id,
-            _id: l._id,
-            title: l.title,
-            category: l.category,
-            donorId: l.donorId?._id || l.donorId,
-            donorName: l.donorId?.organizationName || l.donorId?.name || "Verified Kitchen",
-            donorType: l.donorId?.profileDetails?.orgType || "Food Establishment",
-            servings: l.quantity,
-            weightKg: l.weightKg || 0,
-            status: l.status === 'fully_reserved' ? 'claimed' : l.status,
-            urgency: 'urgent',
-            timeRemainingMins: 90,
-            pickupWindow: `${new Date(l.pickupStart).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(l.pickupEnd).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
-            storageType: l.storageType,
-            packaging: l.packaging,
-            allergens: l.allergens || ['None'],
-            dietaryTags: l.dietaryTags || [],
-            description: l.description,
-            temperatureLog: l.temperatureLog,
-            distance: "1.2 km away",
-            address: l.pickupAddress,
-            imageUrl: l.imageUrl,
-            verificationCode: "SB-4892",
-            otpCode: "749210",
-            createdAt: l.createdAt,
-          }));
+          const normalized = res.data.map((l) => {
+            const reqMatch = userRequests.find(r => (r.listingId?._id || r.listingId) === l._id);
+            return {
+              id: l._id || l.id,
+              _id: l._id,
+              title: l.title,
+              category: l.category,
+              donorId: l.donorId?._id || l.donorId,
+              donorName: l.donorId?.organizationName || l.donorId?.name || "Verified Kitchen",
+              donorType: l.donorId?.profileDetails?.orgType || "Food Establishment",
+              servings: l.quantity,
+              weightKg: l.weightKg || 0,
+              status: l.status === 'fully_reserved' ? 'claimed' : l.status,
+              claimedBy: reqMatch?.recipientId?.organizationName || reqMatch?.recipientId?.name,
+              requestId: reqMatch?._id,
+              urgency: 'urgent',
+              timeRemainingMins: 90,
+              pickupWindow: `${new Date(l.pickupStart).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(l.pickupEnd).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+              storageType: l.storageType,
+              packaging: l.packaging,
+              allergens: l.allergens || ['None'],
+              dietaryTags: l.dietaryTags || [],
+              description: l.description,
+              temperatureLog: l.temperatureLog,
+              distance: "1.2 km away",
+              address: l.pickupAddress,
+              imageUrl: l.imageUrl,
+              verificationCode: reqMatch?.pickupConfirmationDetails?.verificationCode || "SB-4892",
+              otpCode: reqMatch?.pickupConfirmationDetails?.otpCode || "749210",
+              createdAt: l.createdAt,
+            };
+          });
           setDonations(normalized);
         }
       } catch {
@@ -361,22 +379,34 @@ export const AppProvider = ({ children }) => {
   // Claim a donation
   const claimDonation = async (donationId, recipientName) => {
     const claimer = recipientName || currentUser?.organization || "Eastside Hope Food Rescue";
-    const verificationCode = `SB-${Math.floor(1000 + Math.random() * 9000)}`;
-    const otpCode = `${Math.floor(100000 + Math.random() * 900000)}`;
+    let verificationCode = `SB-${Math.floor(1000 + Math.random() * 9000)}`;
+    let otpCode = `${Math.floor(100000 + Math.random() * 900000)}`;
+    let requestId = null;
 
     const targetDonation = donations.find(d => d.id === donationId || d._id === donationId);
 
-    // Try real API if connected and has MongoDB _id
+    // Persist to MongoDB via real API if connected and has MongoDB _id
     if (apiStatus === 'connected' && targetDonation?._id) {
       try {
-        await api.requests.create({
+        const res = await api.requests.create({
           listingId: targetDonation._id,
           requestedQuantity: targetDonation.servings || 10,
           notes: `Reserved by ${claimer}`,
         });
+
+        if (res && res.data) {
+          requestId = res.data._id;
+          if (res.data.pickupConfirmationDetails?.verificationCode) {
+            verificationCode = res.data.pickupConfirmationDetails.verificationCode;
+          }
+          if (res.data.pickupConfirmationDetails?.otpCode) {
+            otpCode = res.data.pickupConfirmationDetails.otpCode;
+          }
+        }
       } catch (err) {
         if (!err.isOffline) {
-          showToast(`API: ${err.message}`, 'error');
+          showToast(`Reservation failed: ${err.message}`, 'error');
+          return { success: false, message: err.message };
         }
       }
     }
@@ -390,11 +420,24 @@ export const AppProvider = ({ children }) => {
           claimedBy: claimer,
           claimTime: new Date().toISOString(),
           verificationCode,
-          otpCode
+          otpCode,
+          requestId,
         };
       }
       return item;
     }));
+
+    if (selectedDonation && (selectedDonation.id === donationId || selectedDonation._id === donationId)) {
+      setSelectedDonation(prev => ({
+        ...prev,
+        status: 'claimed',
+        claimedBy: claimer,
+        claimTime: new Date().toISOString(),
+        verificationCode,
+        otpCode,
+        requestId,
+      }));
+    }
 
     // Add notification
     const newNotif = {
@@ -409,6 +452,7 @@ export const AppProvider = ({ children }) => {
     setNotifications(prev => [newNotif, ...prev]);
 
     showToast(`Donation claimed! Pickup code: ${verificationCode}. OTP is ${otpCode}`, 'success');
+    return { success: true, verificationCode, otpCode, requestId };
   };
 
   // Complete / Handoff verification
@@ -421,6 +465,18 @@ export const AppProvider = ({ children }) => {
       return { success: false, message: "Invalid OTP code" };
     }
 
+    // Persist to MongoDB via real API if connected and has an associated requestId
+    if (apiStatus === 'connected' && item.requestId) {
+      try {
+        await api.requests.complete(item.requestId, enteredOtp);
+      } catch (err) {
+        if (!err.isOffline) {
+          showToast(`Handoff completion failed: ${err.message}`, 'error');
+          return { success: false, message: err.message };
+        }
+      }
+    }
+
     setDonations(prev => prev.map(d => {
       if (d.id === donationId || d._id === donationId) {
         return {
@@ -431,6 +487,14 @@ export const AppProvider = ({ children }) => {
       }
       return d;
     }));
+
+    if (selectedDonation && (selectedDonation.id === donationId || selectedDonation._id === donationId)) {
+      setSelectedDonation(prev => ({
+        ...prev,
+        status: 'completed',
+        completedAt: new Date().toISOString(),
+      }));
+    }
 
     const newNotif = {
       id: `notif-${Date.now()}`,
@@ -470,29 +534,30 @@ export const AppProvider = ({ children }) => {
       imageUrl: donationData.imageUrl || "https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=800&q=80",
     };
 
-    let backendId = null;
+    let backendItem = null;
 
     if (apiStatus === 'connected') {
       try {
         const res = await api.listings.create(payload);
         if (res && res.data) {
-          backendId = res.data._id;
+          backendItem = res.data;
         }
       } catch (err) {
         if (!err.isOffline) {
-          showToast(`Server note: ${err.message}`, 'info');
+          showToast(`Listing creation failed: ${err.message}`, 'error');
+          return { success: false, message: err.message };
         }
       }
     }
 
-    const id = backendId || `DON-${Math.floor(100 + Math.random() * 900)}`;
+    const id = backendItem?._id || `DON-${Math.floor(100 + Math.random() * 900)}`;
     const newDonation = {
       id,
-      _id: backendId,
+      _id: backendItem?._id,
       ...payload,
-      donorId: currentUser?.id || "donor-1",
-      donorName: currentUser?.organization || "Verde Artisan Osteria",
-      donorType: currentUser?.orgType || "Restaurant & Trattoria",
+      donorId: backendItem?.donorId?._id || backendItem?.donorId || currentUser?.id || "donor-1",
+      donorName: backendItem?.donorId?.organizationName || currentUser?.organization || "Verde Artisan Osteria",
+      donorType: backendItem?.donorId?.profileDetails?.orgType || currentUser?.orgType || "Restaurant & Trattoria",
       servings: payload.quantity,
       status: "available",
       urgency: donationData.urgency || "urgent",
@@ -502,7 +567,7 @@ export const AppProvider = ({ children }) => {
       address: payload.pickupAddress,
       verificationCode: `SB-${Math.floor(1000 + Math.random() * 9000)}`,
       otpCode: `${Math.floor(100000 + Math.random() * 900000)}`,
-      createdAt: new Date().toISOString()
+      createdAt: backendItem?.createdAt || new Date().toISOString()
     };
 
     setDonations(prev => [newDonation, ...prev]);
@@ -520,23 +585,48 @@ export const AppProvider = ({ children }) => {
     setNotifications(prev => [newNotif, ...prev]);
 
     showToast(`"${newDonation.title}" listed successfully! Local NGOs notified.`, 'success');
-    return newDonation;
+    return { success: true, donation: newDonation };
   };
 
   // Cancel reservation
-  const cancelClaim = (donationId) => {
+  const cancelClaim = async (donationId) => {
+    const item = donations.find(d => d.id === donationId || d._id === donationId);
+    if (apiStatus === 'connected' && item?.requestId) {
+      try {
+        await api.requests.cancel(item.requestId, 'Cancelled by user');
+      } catch (err) {
+        if (!err.isOffline) {
+          showToast(`Cancel request failed: ${err.message}`, 'error');
+          return { success: false, message: err.message };
+        }
+      }
+    }
+
     setDonations(prev => prev.map(item => {
       if (item.id === donationId || item._id === donationId) {
         return {
           ...item,
           status: 'available',
           claimedBy: null,
-          claimTime: null
+          claimTime: null,
+          requestId: null,
         };
       }
       return item;
     }));
+
+    if (selectedDonation && (selectedDonation.id === donationId || selectedDonation._id === donationId)) {
+      setSelectedDonation(prev => ({
+        ...prev,
+        status: 'available',
+        claimedBy: null,
+        claimTime: null,
+        requestId: null,
+      }));
+    }
+
     showToast('Reservation cancelled. The food is now available for other NGOs.', 'info');
+    return { success: true };
   };
 
   // Reset application data to zero / empty

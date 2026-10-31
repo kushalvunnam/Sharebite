@@ -26,15 +26,20 @@ export const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const DEMO_PRESETS = {
+    donor: { email: 'marco@verdeosteria.com', password: 'DonorPassword123!' },
+    recipient: { email: 'sarah@eastsidehope.org', password: 'ShelterPassword123!' },
+    admin: { email: 'david.safety@sharebite.org', password: 'AdminPassword123!' }
+  };
+
   const [selectedRole, setSelectedRole] = useState('donor');
   const [email, setEmail] = useState(() => {
-    // Only restore previously remembered email, or pre-fill in dev
     const remembered = localStorage.getItem('sharebite_saved_email');
     if (remembered) return remembered;
-    return !import.meta.env.PROD ? 'marco@verdeosteria.com' : '';
+    return DEMO_PRESETS.donor.email;
   });
   const [password, setPassword] = useState(() => {
-    return !import.meta.env.PROD ? 'DonorPassword123!' : '';
+    return DEMO_PRESETS.donor.password;
   });
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(() => {
@@ -43,21 +48,13 @@ export const LoginPage = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [forgotModalOpen, setForgotModalOpen] = useState(false);
 
-  // Sync role tab selection with demo credentials in dev environment
+  // Sync role tab selection with demo credentials
   const handleRoleTabClick = (roleKey) => {
     setSelectedRole(roleKey);
     setErrorMessage('');
-    if (!import.meta.env.PROD) {
-      if (roleKey === 'donor') {
-        setEmail('marco@verdeosteria.com');
-        setPassword('DonorPassword123!');
-      } else if (roleKey === 'recipient') {
-        setEmail('sarah@eastsidehope.org');
-        setPassword('ShelterPassword123!');
-      } else {
-        setEmail('david.safety@sharebite.org');
-        setPassword('AdminPassword123!');
-      }
+    if (DEMO_PRESETS[roleKey]) {
+      setEmail(DEMO_PRESETS[roleKey].email);
+      setPassword(DEMO_PRESETS[roleKey].password);
     }
   };
 
@@ -309,6 +306,43 @@ export const LoginPage = () => {
                 Admin
               </span>
             </button>
+          </div>
+
+          {/* Clearly Labeled Demo Credentials Reference */}
+          <div className="bg-[#faf7f2] border border-gray-200 rounded-2xl p-3 text-[11px] space-y-1.5">
+            <div className="text-[10px] uppercase font-bold text-[#0f392b] tracking-wider flex items-center justify-between">
+              <span>Demo Reviewer Credentials</span>
+              <span className="text-gray-400 font-normal">Click or copy to sign in</span>
+            </div>
+            <div className="divide-y divide-gray-200/60 text-[11px]">
+              <div
+                onClick={() => handleRoleTabClick('donor')}
+                className="py-1 flex items-center justify-between cursor-pointer hover:bg-white/70 px-1 rounded transition-colors"
+                title="Click to populate Donor credentials"
+              >
+                <span className="font-bold text-[#0f392b] text-[10px] uppercase">Role: Donor</span>
+                <span className="font-mono text-gray-700 text-[10px]">marco@verdeosteria.com</span>
+                <span className="font-mono text-gray-500 text-[10px]">DonorPassword123!</span>
+              </div>
+              <div
+                onClick={() => handleRoleTabClick('recipient')}
+                className="py-1 flex items-center justify-between cursor-pointer hover:bg-white/70 px-1 rounded transition-colors"
+                title="Click to populate NGO/Recipient credentials"
+              >
+                <span className="font-bold text-[#f97316] text-[10px] uppercase">Role: NGO / Recipient</span>
+                <span className="font-mono text-gray-700 text-[10px]">sarah@eastsidehope.org</span>
+                <span className="font-mono text-gray-500 text-[10px]">ShelterPassword123!</span>
+              </div>
+              <div
+                onClick={() => handleRoleTabClick('admin')}
+                className="py-1 flex items-center justify-between cursor-pointer hover:bg-white/70 px-1 rounded transition-colors"
+                title="Click to populate Admin credentials"
+              >
+                <span className="font-bold text-purple-700 text-[10px] uppercase">Role: Admin</span>
+                <span className="font-mono text-gray-700 text-[10px]">david.safety@sharebite.org</span>
+                <span className="font-mono text-gray-500 text-[10px]">AdminPassword123!</span>
+              </div>
+            </div>
           </div>
         </div>
 
