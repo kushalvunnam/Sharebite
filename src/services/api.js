@@ -13,7 +13,7 @@ const resolveApiBaseUrl = () => {
     }
   }
   // Strip trailing slashes
-  envUrl = envUrl.replace(/\\/+$/, '');
+  envUrl = envUrl.replace(/\/+$/, '');
   // Ensure /api suffix exists
   if (!envUrl.endsWith('/api')) {
     envUrl = `${envUrl}/api`;
