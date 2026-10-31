@@ -7,13 +7,13 @@ const resolveApiBaseUrl = () => {
   let envUrl = (import.meta.env.VITE_API_BASE_URL || '').trim();
   if (!envUrl) {
     if (import.meta.env.PROD) {
-      envUrl = 'https://sharebite-backend.onrender.com/api';
+      envUrl = 'https://sharebite-1ydl.onrender.com/api';
     } else {
       envUrl = 'http://localhost:5000/api';
     }
   }
   // Strip trailing slashes
-  envUrl = envUrl.replace(/\/+$/, '');
+  envUrl = envUrl.replace(/\\/+$/, '');
   // Ensure /api suffix exists
   if (!envUrl.endsWith('/api')) {
     envUrl = `${envUrl}/api`;
