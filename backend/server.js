@@ -127,15 +127,20 @@ const isTestEnv =
   process.argv.some((a) => a.includes('test'));
 
 if (!isTestEnv) {
-  // Listen on PORT immediately so host platform (Render) detects open port without delay
-  app.listen(PORT, () => {
-    console.log(`[ShareBite API] Backend server running on port ${PORT}`);
-    console.log(`[ShareBite API] Health check available at http://localhost:${PORT}/api/health`);
-  });
-
-  connectDB().catch((err) => {
-    console.error('[ShareBite DB] Background DB connection error:', err.message);
-  });
+  // Establish the database connection before accepting application traffic.
+  // This prevents login/register requests from racing the initial MongoDB connection.
+  connectDB()
+    .catch((err) => {
+      console.error('[ShareBite DB] Initial database connection error:', err.message);
+      return null;
+    })
+    .finally(() => {
+      app.listen(PORT, () => {
+        console.log(`[ShareBite API] Backend server running on port ${PORT}`);
+        console.log(`[ShareBite API] Health check available at http://localhost:${PORT}/api/health`);
+        console.log(`[ShareBite API] Database status at startup: ${getDBStatus()}`);
+      });
+    });
 }
 
 export default app;
